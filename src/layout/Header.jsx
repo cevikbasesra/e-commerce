@@ -1,116 +1,190 @@
-import { ShoppingCart, Search, User, Menu, X } from "lucide-react"; // User ikonunu import ettik
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // React Router'dan navigate fonksiyonu import
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import Gravatar from 'react-gravatar';
+import { 
+  ShoppingCart, 
+  Search, 
+  User, 
+  Menu, 
+  X 
+} from 'lucide-react';
+import { logoutUser } from '../actions/authActions';
+import Slider from '../components/Slider.jsx';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate(); // navigate fonksiyonunu oluşturduk
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  let user = null;
-  try {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      // Only parse if userData is not null or undefined
-      user = JSON.parse(userData);
-    } else {
-      console.log("User data not found in localStorage."); // Helpful for debugging
-      // Optionally, redirect to login here if no user is found.
-      //navigate("/login");
-    }
-  } catch (error) {
-    console.error("User data is not valid JSON:", error);
-    // Clear localStorage if the JSON is corrupted and redirect to login.
-    localStorage.removeItem("user");
-    user = null;
-    navigate("/login"); // Redirect to login after handling the error
-  }
+  // Get user data from Redux store instead of localStorage
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
+  const handleLogoutClick = () => {
+    // Dispatch logout action instead of directly manipulating localStorage
+    dispatch(logoutUser());
+    navigate("/login");
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
-  const handleLoginClick = () => {
-    navigate("/login"); // Kullanıcı Login butonuna tıkladığında login sayfasına yönlendiriliyor
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
   };
 
-  const handleLogoutClick = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login"); // Çıkış yapıldıktan sonra login sayfasına yönlendiriliyor
+  const navigateTo = (path) => {
+    navigate(path);
+    setIsMenuOpen(false);
   };
 
   return (
-    <header className="bg-white p-4">
-      <div className="flex flex-row sm:flex-row items-center justify-between sm:items-center">
-        {/* Header */}
-        <h1 className="text-xl font-bold sm:text-left w-full sm:w-auto">
-          E-commerce
-        </h1>
+    <>
+      <header className="bg-white shadow-sm p-4">
+        <div className="container mx-auto flex flex-row items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center">
+            <h1 className="text-xl font-bold text-gray-800">E-commerce</h1>
+          </div>
 
-        {/* Icons */}
-        <div className="flex space-x-6 sm:ml-auto sm:space-x-6">
-          {user ? (
-            <>
-              <span className="text-gray-700">{user.name}</span>
-              <button className="text-gray-700" onClick={handleLogoutClick}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="text-gray-700" onClick={handleLoginClick}>
-                <User className="w-5 h-5" /> {/* User ikonu kullanıldı */}
-              </button>
-              {/* Signup butonu kaldırıldı */}
-            </>
-          )}
-          <button className="text-gray-700">
-            <Search className="w-5 h-5" />
-          </button>
-          <button className="text-gray-700">
-            <ShoppingCart className="w-5 h-5" />
-          </button>
-          {/* Menu Button */}
-          <button className="text-gray-700 sm:hidden" onClick={toggleMenu}>
-            {isMenuOpen ? (
-              <X className="w-5 h-5" />
+          {/* Navigation and Icons */}
+          <div className="flex items-center space-x-4">
+            {/* Search Icon */}
+            <button className="text-gray-600 hover:text-gray-800 transition-colors">
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* Cart Icon */}
+            <button className="text-gray-600 hover:text-gray-800 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+
+            {/* User Section */}
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <div
+                  className="flex items-center cursor-pointer"
+                  onClick={toggleDropdown}
+                >
+                  <Gravatar
+                    email={user.email || `user-${user.id}@example.com`}
+                    size={36}
+                    className="rounded-full border-2 border-transparent hover:border-blue-500 transition-all"
+                    default="mp"
+                  />
+                </div>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-20">
+                    <div className="px-4 py-3 border-b">
+                      <p className="text-sm font-medium text-gray-800">
+                        {user.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <ul className="py-1">
+                      <li>
+                        <button
+                          onClick={() => {
+                            navigate("/profile");
+                            setIsDropdownOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Profile
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={() => {
+                            handleLogoutClick();
+                            setIsDropdownOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Menu className="w-5 h-5" />
+              <button
+                onClick={handleLoginClick}
+                className="text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <User className="w-5 h-5" />
+              </button>
             )}
-          </button>
-        </div>
-      </div>
 
-      {/* Navigation Menu */}
-      <nav>
-        <ul
-          className={`${
-            isMenuOpen ? "flex" : "hidden"
-          } flex-col items-center space-y-10 sm:flex-row sm:space-x-6 sm:space-y-0`}
-        >
-          <li>
-            <a href="/" className="text-gray-700">
-              Home
-            </a>
-          </li>
-          <li>
-            <a href="/product" className="text-gray-700">
-              Product
-            </a>
-          </li>
-          <li>
-            <a href="/pricing" className="text-gray-700">
-              Pricing
-            </a>
-          </li>
-          <li>
-            <a href="/contact" className="text-gray-700">
-              Contact
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </header>
+            {/* Mobile Menu Toggle */}
+            <button
+              className="sm:hidden text-gray-600 hover:text-gray-800"
+              onClick={toggleMenu}
+            >
+              {isMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMenuOpen && (
+          <nav className="sm:hidden">
+            <ul className="flex flex-col items-center space-y-2 mt-4">
+              <li>
+                <button
+                  onClick={() => navigateTo("/")}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Home
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigateTo("/product")}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Product
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigateTo("/pricing")}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Pricing
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigateTo("/contact")}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Contact
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
+      </header>
+      
+      {/* Slider right after the header */}
+      <Slider />
+    </>
   );
 };
 

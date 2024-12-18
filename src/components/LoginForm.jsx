@@ -1,7 +1,10 @@
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
-import { useState } from "react";
-import { toast } from "react-toastify"; // Toastify'i import ediyoruz
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import Gravatar from "react-gravatar";
+import { loginUser } from "../actions/authActions";
 
 const LoginForm = () => {
   const {
@@ -10,70 +13,60 @@ const LoginForm = () => {
     formState: { errors },
   } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true); // Form gönderilmeye başlandığında
-    const loginToastId = toast.info("Logging in...", { autoClose: false }); // Giriş işlemi başladığında gösterilecek toast
+    setIsSubmitting(true);
+    const loginToastId = toast.info("Logging in...", { autoClose: false });
 
     try {
-      // 1000ms (1 saniye) bekleyelim, ardından giriş işlemini başlatalım.
-      setTimeout(async () => {
-        try {
-          const response = await axios.post(
-            "https://workintech-fe-ecommerce.onrender.com/login",
-            data
-          );
+      const response = await dispatch(loginUser({
+        ...data,
+        rememberMe
+      }));
+      
+      // Dismiss loading toast
+      toast.dismiss(loginToastId);
+      
+      // Success toast
+      toast.success("Login successful!");
 
-          // Başarılı giriş
-          localStorage.setItem("user", JSON.stringify(response.data.user));
-          localStorage.setItem("token", response.data.token);
-
-          // `toast.dismiss()` ile "Logging in..." mesajını hemen kapatıyoruz
-          toast.dismiss(loginToastId);
-
-          // Başarılı giriş mesajı
-          toast.success("Login successful! Redirecting...");
-
-          // Yönlendirme işlemi
-          setTimeout(() => {
-            window.location.href = "/"; // Anasayfaya yönlendiriyoruz
-          }, 2000); // 2 saniye sonra yönlendirme
-        } catch (error) {
-          // `toast.dismiss()` ile "Logging in..." mesajını hemen kapatıyoruz
-          toast.dismiss(loginToastId);
-
-          // Başarısız giriş mesajı
-          toast.error("Invalid credentials or other error");
-        } finally {
-          setIsSubmitting(false); // Form gönderimi sonlandı
-        }
-      }, 1000); // 1 saniye sonra login işlemi başlatılıyor
+      // Redirect logic
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
     } catch (error) {
-      // `toast.dismiss()` ile "Logging in..." mesajını hemen kapatıyoruz
+      // Dismiss loading toast
       toast.dismiss(loginToastId);
 
-      // Başarısız giriş mesajı
-      toast.error("Invalid credentials or other error");
+      // Error toast
+      toast.error(error.message || "Login failed");
     } finally {
-      setIsSubmitting(false); // Form gönderimi sonlandı
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-semibold text-center">Login</h2>
-
-      {/* Login formu */}
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email
           </label>
           <input
             type="email"
             id="email"
-            className="w-full p-2 border"
-            {...register("email", { required: "Email is required" })}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            {...register("email", { 
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address"
+              }
+            })}
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -81,13 +74,13 @@ const LoginForm = () => {
         </div>
 
         <div>
-          <label htmlFor="password" className="block">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Password
           </label>
           <input
             type="password"
             id="password"
-            className="w-full p-2 border"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             {...register("password", { required: "Password is required" })}
           />
           {errors.password && (
@@ -95,9 +88,27 @@ const LoginForm = () => {
           )}
         </div>
 
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label 
+              htmlFor="remember-me" 
+              className="ml-2 block text-sm text-gray-900"
+            >
+              Remember me
+            </label>
+          </div>
+        </div>
+
         <button
           type="submit"
-          className="w-full py-2 bg-blue-500 text-white"
+          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Logging in..." : "Login"}
@@ -106,13 +117,14 @@ const LoginForm = () => {
 
       {/* Signup Link */}
       <div className="text-center mt-4">
-        <p className="text-sm">
+        <p className="text-sm text-gray-600">
           Don't have an account?{" "}
           <button
-            onClick={() => (window.location.href = "/signup")}
-            className="text-blue-500 hover:underline"
+            type="button"
+            onClick={() => navigate("/signup")}
+            className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
           >
-            Create one now.
+            Create one now
           </button>
         </p>
       </div>

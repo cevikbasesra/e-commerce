@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react"; // Eye and EyeOff icons from lucide-react
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { registerUser } from "../actions/authActions";
+import { Eye, EyeOff } from "lucide-react";
 
 // Create Axios instance
 const api = axios.create({
@@ -15,13 +18,20 @@ const SignupForm = () => {
     handleSubmit,
     control,
     watch,
-    formState: { errors, isSubmitting },
-  } = useForm();
+    getValues,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      role_id: "2", // Default to customer role
+    }
+  });
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState(null);
-  const [passwordVisible, setPasswordVisible] = useState(false); // To toggle password visibility
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // For confirm password visibility
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const selectedRole = watch("role_id");
 
@@ -37,7 +47,27 @@ const SignupForm = () => {
     fetchRoles();
   }, []);
 
+  const passwordValidationRules = {
+    required: "Password is required",
+    minLength: {
+      value: 8,
+      message: "Password must be at least 8 characters",
+    },
+    validate: {
+      hasNumber: (value) => /\d/.test(value) || "Password must include a number",
+      hasLowercase: (value) => /[a-z]/.test(value) || "Password must include a lowercase letter",
+      hasUppercase: (value) => /[A-Z]/.test(value) || "Password must include an uppercase letter",
+      hasSpecialChar: (value) => /[!@#$%^&*(),.?":{}|<>]/.test(value) || "Password must include a special character",
+    }
+  };
+
+  const turkishPhoneRegex = /^(05)([0-9]{9})$/;
+  const turkishTaxIdRegex = /^T\d{4}V\d{6}$/;
+
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    const signupToastId = toast.info("Signing up...", { autoClose: false });
+
     try {
       const formData = {
         name: data.name,
@@ -46,47 +76,66 @@ const SignupForm = () => {
         role_id: data.role_id,
       };
 
-      if (data.role_id === "3") {
-        // Assuming '3' is the store role ID
+      if (data.role_id === "3") { // Assuming '3' is the store role ID
         formData.store = {
           name: data.storeName,
           phone: data.storePhone,
-          tax_no: data.storeTaxId,
-          bank_account: data.storeBankAccount,
+          taxId: data.storeTaxId,
+          bankAccount: data.storeBankAccount,
         };
       }
 
-      await api.post("/signup", formData);
-      navigate(-1); // Go back to previous page
-      alert(
-        "You need to click the link in your email to activate your account!"
+      await dispatch(registerUser(formData));
+
+      // Dismiss loading toast
+      toast.dismiss(signupToastId);
+
+      // Success toast with email activation warning
+      toast.warning(
+        "Registration successful! Please check your email to activate your account.",
+        {
+          autoClose: 5000,
+        }
       );
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
-      setError(
-        error.response?.data?.message || "An error occurred during signup"
-      );
+      // Dismiss loading toast
+      toast.dismiss(signupToastId);
+
+      // Error toast
+      toast.error(error.message || "Registration failed");
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-semibold text-center">Sign Up</h2>
+      <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
 
-      {/* Signup formu */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="name" className="block mb-1">
-            Name
+            Full Name
           </label>
           <input
             id="name"
-            {...register("name", { required: true, minLength: 3 })}
+            {...register("name", {
+              required: "Name is required",
+              minLength: {
+                value: 3,
+                message: "Name must be at least 3 characters",
+              },
+            })}
             className="w-full px-3 py-2 border rounded"
           />
           {errors.name && (
-            <span className="text-red-500">
-              Name is required (min 3 characters)
-            </span>
+            <span className="text-red-500">{errors.name.message}</span>
           )}
         </div>
 
@@ -98,13 +147,36 @@ const SignupForm = () => {
             id="email"
             type="email"
             {...register("email", {
-              required: true,
-              pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
             })}
             className="w-full px-3 py-2 border rounded"
           />
           {errors.email && (
-            <span className="text-red-500">Valid email is required</span>
+            <span className="text-red-500">{errors.email.message}</span>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="role_id" className="block mb-1">
+            Select Role
+          </label>
+          <select
+            id="role_id"
+            {...register("role_id", { required: "Role is required" })}
+            className="w-full px-3 py-2 border rounded"
+          >
+            {roles.map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.name}
+              </option>
+            ))}
+          </select>
+          {errors.role_id && (
+            <span className="text-red-500">{errors.role_id.message}</span>
           )}
         </div>
 
@@ -115,27 +187,20 @@ const SignupForm = () => {
           <div className="relative">
             <input
               id="password"
-              type={passwordVisible ? "text" : "password"} // Toggle password visibility
-              {...register("password", {
-                required: true,
-                minLength: 8,
-                pattern:
-                  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[a-zA-Z]).{8,}$/,
-              })}
-              className="w-full px-3 py-2 border rounded"
+              type={passwordVisible ? "text" : "password"}
+              {...register("password", passwordValidationRules)}
+              className="w-full px-3 py-2 border rounded pr-10"
             />
-            <div
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-              onClick={() => setPasswordVisible(!passwordVisible)} // Toggle visibility
+            <button
+              type="button"
+              onClick={() => setPasswordVisible(!passwordVisible)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
             >
-              {passwordVisible ? <EyeOff /> : <Eye />}
-            </div>
+              {passwordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
           {errors.password && (
-            <span className="text-red-500">
-              Password must be at least 8 characters long and include numbers,
-              lowercase, uppercase, and special characters
-            </span>
+            <span className="text-red-500">{errors.password.message}</span>
           )}
         </div>
 
@@ -146,46 +211,25 @@ const SignupForm = () => {
           <div className="relative">
             <input
               id="confirmPassword"
-              type={confirmPasswordVisible ? "text" : "password"} // Toggle confirm password visibility
+              type={confirmPasswordVisible ? "text" : "password"}
               {...register("confirmPassword", {
-                validate: (value) =>
-                  value === watch("password") || "Passwords do not match",
+                required: "Please confirm your password",
+                validate: (value) => 
+                  value === getValues("password") || "Passwords do not match"
               })}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded pr-10"
             />
-            <div
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)} // Toggle visibility
+            <button
+              type="button"
+              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
             >
-              {confirmPasswordVisible ? <EyeOff /> : <Eye />}
-            </div>
+              {confirmPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
           {errors.confirmPassword && (
-            <span className="text-red-500">
-              {errors.confirmPassword.message}
-            </span>
+            <span className="text-red-500">{errors.confirmPassword.message}</span>
           )}
-        </div>
-
-        <div>
-          <label htmlFor="role" className="block mb-1">
-            Role
-          </label>
-          <Controller
-            name="role_id"
-            control={control}
-            defaultValue="2" // Assuming '2' is the customer role ID
-            rules={{ required: true }}
-            render={({ field }) => (
-              <select {...field} className="w-full px-3 py-2 border rounded">
-                {roles.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          />
         </div>
 
         {selectedRole === "3" && (
@@ -196,13 +240,17 @@ const SignupForm = () => {
               </label>
               <input
                 id="storeName"
-                {...register("storeName", { required: true, minLength: 3 })}
+                {...register("storeName", {
+                  required: "Store name is required",
+                  minLength: {
+                    value: 3,
+                    message: "Store name must be at least 3 characters",
+                  },
+                })}
                 className="w-full px-3 py-2 border rounded"
               />
               {errors.storeName && (
-                <span className="text-red-500">
-                  Store name is required (min 3 characters)
-                </span>
+                <span className="text-red-500">{errors.storeName.message}</span>
               )}
             </div>
 
@@ -213,15 +261,16 @@ const SignupForm = () => {
               <input
                 id="storePhone"
                 {...register("storePhone", {
-                  required: true,
-                  pattern: /^(\+90|0)?[1-9][0-9]{9}$/,
+                  required: "Store phone is required",
+                  pattern: {
+                    value: turkishPhoneRegex,
+                    message: "Invalid Turkish phone number (format: 05XXXXXXXXX)",
+                  },
                 })}
                 className="w-full px-3 py-2 border rounded"
               />
               {errors.storePhone && (
-                <span className="text-red-500">
-                  Valid Turkish phone number is required
-                </span>
+                <span className="text-red-500">{errors.storePhone.message}</span>
               )}
             </div>
 
@@ -232,15 +281,16 @@ const SignupForm = () => {
               <input
                 id="storeTaxId"
                 {...register("storeTaxId", {
-                  required: true,
-                  pattern: /^T\d{3}V\d{6}$/,
+                  required: "Store tax ID is required",
+                  pattern: {
+                    value: turkishTaxIdRegex,
+                    message: "Invalid tax ID (format: TXXXXVXXXXXX)",
+                  },
                 })}
                 className="w-full px-3 py-2 border rounded"
               />
               {errors.storeTaxId && (
-                <span className="text-red-500">
-                  Valid Tax ID is required (TXXXVXXXXXX)
-                </span>
+                <span className="text-red-500">{errors.storeTaxId.message}</span>
               )}
             </div>
 
@@ -251,40 +301,42 @@ const SignupForm = () => {
               <input
                 id="storeBankAccount"
                 {...register("storeBankAccount", {
-                  required: true,
-                  pattern: /^TR\d{2}[0-9A-Z]{5}[0-9A-Z]{17}$/,
+                  required: "Bank account is required",
+                  pattern: {
+                    value: /^TR\d{2}\s?(\d{4}\s?){5}$/,
+                    message: "Invalid IBAN address",
+                  },
                 })}
                 className="w-full px-3 py-2 border rounded"
               />
               {errors.storeBankAccount && (
-                <span className="text-red-500">Valid IBAN is required</span>
+                <span className="text-red-500">{errors.storeBankAccount.message}</span>
               )}
             </div>
           </>
         )}
 
-        {error && <div className="text-red-500">{error}</div>}
-
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
-          {isSubmitting ? "Submitting..." : "Sign Up"}
+          {isSubmitting ? "Signing Up..." : "Sign Up"}
         </button>
-      </form>
 
-      <div className="text-center mt-4">
-        <p className="text-sm">
-          Already have an account?{" "}
-          <button
-            onClick={() => (window.location.href = "/login")}
-            className="text-blue-500 hover:underline"
-          >
-            Log in now.
-          </button>
-        </p>
-      </div>
+        <div className="text-center mt-4">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <button 
+              type="button"
+              onClick={() => navigate("/login")}
+              className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
+            >
+              Log in
+            </button>
+          </p>
+        </div>
+      </form>
     </div>
   );
 };
