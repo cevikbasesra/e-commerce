@@ -41,7 +41,7 @@ const SignupForm = () => {
         const response = await api.get("/roles");
         setRoles(response.data);
       } catch (error) {
-        console.error("Error fetching roles:", error);
+        setError('Failed to fetch roles. Please try again.');
       }
     };
     fetchRoles();

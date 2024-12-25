@@ -47,11 +47,11 @@ const authService = {
       }
       return response.data;
     } catch (error) {
-      console.error('Login Error:', {
-        error: error.response ? error.response.data : error.message,
-        status: error.response?.status
-      });
-      throw error.response ? error.response.data : new Error("Login failed");
+      throw {
+        message: error.response?.data?.message || 'An error occurred during login',
+        status: error.response?.status,
+        data: error.response?.data
+      };
     }
   },
 
@@ -60,11 +60,11 @@ const authService = {
       const response = await api.post("/signup", userData);
       return response.data;
     } catch (error) {
-      console.error('Register Error:', {
-        error: error.response ? error.response.data : error.message,
-        status: error.response?.status
-      });
-      throw error.response ? error.response.data : new Error("Registration failed");
+      throw {
+        message: error.response?.data?.message || 'An error occurred during registration',
+        status: error.response?.status,
+        data: error.response?.data
+      };
     }
   },
 
@@ -73,9 +73,9 @@ const authService = {
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
     } catch (error) {
-      console.error('Logout Error:', error);
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
+      throw error;
     }
   },
 
@@ -84,12 +84,12 @@ const authService = {
       const response = await api.get("/verify-token");
       return response.data;
     } catch (error) {
-      console.error('Verify Token Error:', {
-        error: error.response ? error.response.data : error.message,
-        status: error.response?.status
-      });
       localStorage.removeItem("token");
-      throw error;
+      throw {
+        message: error.response?.data?.message || 'Failed to verify token',
+        status: error.response?.status,
+        data: error.response?.data
+      };
     }
   },
 };

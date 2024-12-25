@@ -6,13 +6,10 @@ export const authStart = () => ({
   type: types.AUTH_START,
 });
 
-export const authSuccess = (userData) => {
-  console.log('Auth Success Payload:', userData);
-  return {
-    type: types.AUTH_SUCCESS,
-    payload: userData,
-  };
-};
+export const authSuccess = (userData) => ({
+  type: types.AUTH_SUCCESS,
+  payload: userData,
+});
 
 export const authFail = (error) => ({
   type: types.AUTH_FAIL,
@@ -39,9 +36,6 @@ export const loginUser = (credentials) => async (dispatch) => {
     dispatch(authStart());
     const data = await authService.login(credentials);
 
-    // Log the entire data object for debugging
-    console.log('Login Response Data:', data);
-
     // Ensure user data exists, even if minimal
     const userData = data.user || {
       id: data.id,
@@ -62,7 +56,6 @@ export const loginUser = (credentials) => async (dispatch) => {
     dispatch(authSuccess(userData));
     return data;
   } catch (error) {
-    console.error('Login User Error:', error);
     dispatch(authFail(error.response?.data?.message || "Login failed"));
     throw error;
   }

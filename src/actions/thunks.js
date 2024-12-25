@@ -27,7 +27,6 @@ export const getRoles = () => async (dispatch, getState) => {
         // Dispatch to store
         dispatch(setRoles(roles));
     } catch (error) {
-        console.error('Failed to fetch roles:', error);
         // You might want to dispatch an error action here
     }
 };
