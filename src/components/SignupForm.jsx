@@ -319,7 +319,7 @@ const SignupForm = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+          className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
         >
           {isSubmitting ? "Signing Up..." : "Sign Up"}
         </button>
@@ -330,7 +330,7 @@ const SignupForm = () => {
             <button 
               type="button"
               onClick={() => navigate("/login")}
-              className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
+              className="text-primary hover:text-primary-dark hover:underline focus:outline-none"
             >
               Log in
             </button>

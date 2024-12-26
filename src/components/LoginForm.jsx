@@ -59,7 +59,7 @@ const LoginForm = () => {
           <input
             type="email"
             id="email"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             {...register("email", { 
               required: "Email is required",
               pattern: {
@@ -80,7 +80,7 @@ const LoginForm = () => {
           <input
             type="password"
             id="password"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             {...register("password", { required: "Password is required" })}
           />
           {errors.password && (
@@ -95,7 +95,7 @@ const LoginForm = () => {
               type="checkbox"
               checked={rememberMe}
               onChange={() => setRememberMe(!rememberMe)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
             />
             <label 
               htmlFor="remember-me" 
@@ -108,7 +108,7 @@ const LoginForm = () => {
 
         <button
           type="submit"
-          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Logging in..." : "Login"}
@@ -122,7 +122,7 @@ const LoginForm = () => {
           <button
             type="button"
             onClick={() => navigate("/signup")}
-            className="text-blue-500 hover:text-blue-700 hover:underline focus:outline-none"
+            className="text-primary hover:text-primary-dark hover:underline focus:outline-none"
           >
             Create one now
           </button>

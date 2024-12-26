@@ -12,8 +12,7 @@ import {
 } from 'lucide-react';
 import { logoutUser } from '../actions/authActions';
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const Header = ({ isMenuOpen, setIsMenuOpen }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -113,7 +112,7 @@ const Header = () => {
                   <Gravatar
                     email={user.email || `user-${user.id}@example.com`}
                     size={32}
-                    className="rounded-full border-2 border-transparent hover:border-blue-500 transition-all"
+                    className="rounded-full border-2 border-transparent hover:border-primary transition-all"
                     default="mp"
                   />
                 </div>
@@ -193,49 +192,51 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 flex flex-col items-center">
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/')}
-            >
-              Home
-            </a>
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/shop')}
-            >
-              Shop
-            </a>
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/about')}
-            >
-              About
-            </a>
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/blog')}
-            >
-              Blog
-            </a>
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/contact')}
-            >
-              Contact
-            </a>
-            <a 
-              href="#" 
-              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-              onClick={() => navigateTo('/pages')}
-            >
-              Pages
-            </a>
+          <nav className="md:hidden fixed top-[60px] left-0 w-full bg-white shadow-lg">
+            <div className="container mx-auto py-4 flex flex-col items-center">
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/')}
+              >
+                Home
+              </a>
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/shop')}
+              >
+                Shop
+              </a>
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/about')}
+              >
+                About
+              </a>
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/blog')}
+              >
+                Blog
+              </a>
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/contact')}
+              >
+                Contact
+              </a>
+              <a 
+                href="#" 
+                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                onClick={() => navigateTo('/pages')}
+              >
+                Pages
+              </a>
+            </div>
           </nav>
         )}
       </div>

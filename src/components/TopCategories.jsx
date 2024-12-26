@@ -17,12 +17,12 @@ const TopCategories = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4">
+    <div className="flex flex-wrap -mx-2 p-4">
       {topCategories.map((category) => (
         <div
           key={category.id}
           onClick={() => handleCategoryClick(category)}
-          className="cursor-pointer transform transition-transform hover:scale-105"
+          className="w-full md:w-1/5 px-2 mb-4 cursor-pointer transform transition-transform hover:scale-105"
         >
           <div className="relative aspect-square overflow-hidden">
             <img

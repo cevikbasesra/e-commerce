@@ -101,7 +101,7 @@ const ShopPage = () => {
           <div className="relative">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2"
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
@@ -118,7 +118,7 @@ const ShopPage = () => {
                     onClick={() => handleFilterChange(option)}
                     className={`w-full text-left px-4 py-2 text-sm rounded-md ${
                       filter === option
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-primary text-white'
                         : 'hover:bg-gray-100'
                     }`}
                   >
@@ -133,7 +133,7 @@ const ShopPage = () => {
           <select
             value={sort}
             onChange={handleSortChange}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -152,37 +152,40 @@ const ShopPage = () => {
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                routeParams={{ gender, categoryName, categoryId }}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pageCount > 1 && (
-            <div className="mt-8 flex justify-center">
-              <ReactPaginate
-                previousLabel="Previous"
-                nextLabel="Next"
-                pageCount={pageCount}
-                onPageChange={handlePageChange}
-                forcePage={currentPage}
-                containerClassName="flex gap-2"
-                pageClassName="px-3 py-2 rounded-md hover:bg-gray-100"
-                previousClassName="px-3 py-2 rounded-md hover:bg-gray-100"
-                nextClassName="px-3 py-2 rounded-md hover:bg-gray-100"
-                activeClassName="bg-blue-500 text-white hover:bg-blue-600"
-                disabledClassName="text-gray-400 cursor-not-allowed"
-                renderOnZeroPageCount={null}
-              />
+        <div className="flex flex-wrap -mx-3">
+          {products.map((product) => (
+            <div key={product.id} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 px-3 mb-6">
+              <ProductCard product={product} routeParams={{ gender, categoryName, categoryId }} />
             </div>
-          )}
-        </>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pageCount > 1 && (
+        <div className="mt-8 flex justify-center">
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <ReactPaginate
+              previousLabel="First"
+              nextLabel="Next"
+              pageCount={pageCount}
+              onPageChange={handlePageChange}
+              forcePage={currentPage}
+              pageRangeDisplayed={3}
+              marginPagesDisplayed={1}
+              containerClassName="flex"
+              pageClassName="border-x border-gray-200"
+              pageLinkClassName="px-4 py-6 block hover:bg-gray-50"
+              previousClassName="border-r border-gray-200"
+              previousLinkClassName="px-4 py-6 block hover:bg-gray-50"
+              nextClassName="border-l border-gray-200"
+              nextLinkClassName="px-4 py-6 block hover:bg-gray-50"
+              activeClassName="bg-primary text-white hover:bg-primary-dark border-primary"
+              disabledClassName="text-gray-400 cursor-not-allowed"
+              renderOnZeroPageCount={null}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

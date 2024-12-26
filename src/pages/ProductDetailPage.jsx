@@ -88,21 +88,16 @@ const ProductDetailPage = () => {
               className="w-full h-full object-cover rounded-lg"
             />
           </div>
-          <div className="grid grid-cols-4 gap-2">
-            {product.images?.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImage(image.url)}
-                className={`aspect-w-1 aspect-h-1 rounded-md overflow-hidden ${
-                  selectedImage === image.url ? 'ring-2 ring-blue-500' : ''
-                }`}
-              >
+          <div className="flex flex-wrap -mx-1">
+            {product.images.map((image, index) => (
+              <div key={index} className="w-1/4 px-1 mb-2">
                 <img
                   src={image.url}
-                  alt={`${product.name} view ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  alt={`Product ${index + 1}`}
+                  className="w-full h-24 object-cover cursor-pointer"
+                  onClick={() => setSelectedImage(image.url)}
                 />
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -114,7 +109,7 @@ const ProductDetailPage = () => {
               <li className="inline-flex items-center">
                 <button
                   onClick={() => navigate('/')}
-                  className="text-gray-700 hover:text-blue-600"
+                  className="text-gray-700 hover:text-primary"
                 >
                   Home
                 </button>
@@ -124,7 +119,7 @@ const ProductDetailPage = () => {
                   <span className="mx-2 text-gray-400">/</span>
                   <button
                     onClick={() => navigate(-1)}
-                    className="text-gray-700 hover:text-blue-600"
+                    className="text-gray-700 hover:text-primary"
                   >
                     Back
                   </button>
@@ -161,7 +156,7 @@ const ProductDetailPage = () => {
 
           <div className="mb-6">
             <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-2xl font-bold text-price">
                 ${product.price?.toFixed(2)}
               </span>
               {product.discount > 0 && (
@@ -193,7 +188,7 @@ const ProductDetailPage = () => {
                   onClick={() => setSelectedSize(size)}
                   className={`px-4 py-2 text-sm rounded-md ${
                     selectedSize === size
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
                 >
@@ -213,7 +208,7 @@ const ProductDetailPage = () => {
                   onClick={() => setSelectedColor(color)}
                   className={`px-4 py-2 text-sm rounded-md ${
                     selectedColor === color
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
                 >
@@ -250,7 +245,7 @@ const ProductDetailPage = () => {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dark disabled:opacity-50"
             >
               Add to Cart
             </button>
