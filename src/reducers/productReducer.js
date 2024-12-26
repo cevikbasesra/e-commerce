@@ -1,26 +1,26 @@
 import * as types from '../actions/types/productTypes';
 
 const initialState = {
-    categories: [],
-    productList: [],
+    products: [],
+    currentProduct: null,
     total: 0,
-    limit: 25,
+    fetchState: 'idle', // 'idle' | 'loading' | 'success' | 'error'
+    limit: 10,
     offset: 0,
-    filter: '',
-    fetchState: 'NOT_FETCHED'
+    filter: {}
 };
 
 const productReducer = (state = initialState, action) => {
     switch (action.type) {
-        case types.SET_CATEGORIES:
-            return {
-                ...state,
-                categories: action.payload
-            };
         case types.SET_PRODUCT_LIST:
             return {
                 ...state,
-                productList: action.payload
+                products: action.payload
+            };
+        case types.SET_CURRENT_PRODUCT:
+            return {
+                ...state,
+                currentProduct: action.payload
             };
         case types.SET_TOTAL:
             return {

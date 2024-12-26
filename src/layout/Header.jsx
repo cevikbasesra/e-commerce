@@ -7,18 +7,16 @@ import {
   Search, 
   User, 
   Menu, 
-  X 
+  X,
+  Heart
 } from 'lucide-react';
 import { logoutUser } from '../actions/authActions';
-import Slider from '../components/Slider.jsx';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // Get user data from Redux store instead of localStorage
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   const handleLoginClick = () => {
@@ -26,7 +24,6 @@ const Header = () => {
   };
 
   const handleLogoutClick = () => {
-    // Dispatch logout action instead of directly manipulating localStorage
     dispatch(logoutUser());
     navigate("/login");
   };
@@ -45,26 +42,67 @@ const Header = () => {
   };
 
   return (
-    <>
-      <header className="bg-white shadow-sm p-4">
-        <div className="container mx-auto flex flex-row items-center justify-between">
+    <header className="bg-white shadow-sm p-2 md:p-4 fixed w-full top-0 z-50">
+      <div className="container mx-auto">
+        <div className="flex flex-row items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-800">E-commerce</h1>
+            <h1 
+              className="text-lg md:text-xl font-bold text-gray-800 cursor-pointer"
+              onClick={() => navigateTo('/')}
+            >
+              E-commerce
+            </h1>
           </div>
 
-          {/* Navigation and Icons */}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/')}
+            >
+              Home
+            </a>
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/shop')}
+            >
+              Shop
+            </a>
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/about')}
+            >
+              About
+            </a>
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/blog')}
+            >
+              Blog
+            </a>
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/contact')}
+            >
+              Contact
+            </a>
+            <a 
+              href="#" 
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={() => navigateTo('/pages')}
+            >
+              Pages
+            </a>
+          </nav>
+
+          {/* Icons Section */}
           <div className="flex items-center space-x-4">
-            {/* Search Icon */}
-            <button className="text-gray-600 hover:text-gray-800 transition-colors">
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Cart Icon */}
-            <button className="text-gray-600 hover:text-gray-800 transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-            </button>
-
             {/* User Section */}
             {isAuthenticated && user ? (
               <div className="relative">
@@ -74,117 +112,134 @@ const Header = () => {
                 >
                   <Gravatar
                     email={user.email || `user-${user.id}@example.com`}
-                    size={36}
+                    size={32}
                     className="rounded-full border-2 border-transparent hover:border-blue-500 transition-all"
                     default="mp"
                   />
                 </div>
 
-                {/* Dropdown Menu */}
+                {/* User Dropdown */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-20">
-                    <div className="px-4 py-3 border-b">
-                      <p className="text-sm font-medium text-gray-800">
-                        {user.name || "User"}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                    <ul className="py-1">
-                      <li>
-                        <button
-                          onClick={() => {
-                            navigate("/profile");
-                            setIsDropdownOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Profile
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          onClick={() => {
-                            handleLogoutClick();
-                            setIsDropdownOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          Logout
-                        </button>
-                      </li>
-                    </ul>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <a
+                      href="#"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => navigateTo('/profile')}
+                    >
+                      Profile
+                    </a>
+                    <a
+                      href="#"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => navigateTo('/orders')}
+                    >
+                      Orders
+                    </a>
+                    <a
+                      href="#"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleLogoutClick}
+                    >
+                      Logout
+                    </a>
                   </div>
                 )}
               </div>
             ) : (
               <button
                 onClick={handleLoginClick}
-                className="text-gray-600 hover:text-gray-800 transition-colors"
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-800"
               >
                 <User className="w-5 h-5" />
+                <span className="hidden md:inline">Login</span>
               </button>
             )}
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="sm:hidden text-gray-600 hover:text-gray-800"
-              onClick={toggleMenu}
-            >
-              {isMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+            <button className="text-gray-600 hover:text-gray-800 transition-colors">
+              <Search className="w-5 h-5" />
             </button>
+
+            <button 
+              className="text-gray-600 hover:text-gray-800 transition-colors relative flex items-center"
+              onClick={() => navigateTo('/cart')}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="ml-1 text-xs">
+                0
+              </span>
+            </button>
+
+            <button 
+              className="text-gray-600 hover:text-gray-800 transition-colors relative flex items-center"
+              onClick={() => navigateTo('/wishlist')}
+            >
+              <Heart className="w-5 h-5" />
+              <span className="ml-1 text-xs">
+                0
+              </span>
+            </button>
+            
+            {/* Mobile Menu Button */}
+            <div className="block md:hidden">
+              <button 
+                onClick={toggleMenu}
+                className="p-2 text-gray-600 hover:text-gray-800 focus:outline-none"
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <nav className="sm:hidden">
-            <ul className="flex flex-col items-center space-y-2 mt-4">
-              <li>
-                <button
-                  onClick={() => navigateTo("/")}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Home
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo("/product")}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Product
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo("/pricing")}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Pricing
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigateTo("/contact")}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Contact
-                </button>
-              </li>
-            </ul>
+          <nav className="md:hidden mt-4 pb-4 flex flex-col items-center">
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/')}
+            >
+              Home
+            </a>
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/shop')}
+            >
+              Shop
+            </a>
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/about')}
+            >
+              About
+            </a>
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/blog')}
+            >
+              Blog
+            </a>
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/contact')}
+            >
+              Contact
+            </a>
+            <a 
+              href="#" 
+              className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+              onClick={() => navigateTo('/pages')}
+            >
+              Pages
+            </a>
           </nav>
         )}
-      </header>
-      
-      {/* Slider right after the header */}
-      <Slider />
-    </>
+      </div>
+    </header>
   );
 };
 
