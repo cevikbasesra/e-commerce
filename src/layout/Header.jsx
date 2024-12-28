@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Gravatar from "react-gravatar";
@@ -12,6 +12,11 @@ const Header = () => {
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+
+  // Close dropdown when auth state changes
+  useEffect(() => {
+    setIsDropdownOpen(false);
+  }, [isAuthenticated]);
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -33,6 +38,7 @@ const Header = () => {
   const navigateTo = (path) => {
     navigate(path);
     setIsMenuOpen(false);
+    setIsDropdownOpen(false); // Close dropdown when navigating
   };
 
   return (
