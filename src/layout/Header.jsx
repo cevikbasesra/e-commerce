@@ -1,22 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import Gravatar from 'react-gravatar';
-import { 
-  ShoppingCart, 
-  Search, 
-  User, 
-  Menu, 
-  X,
-  Heart
-} from 'lucide-react';
-import { logoutUser } from '../actions/authActions';
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import Gravatar from "react-gravatar";
+import { ShoppingCart, Search, User, Menu, X, Heart } from "lucide-react";
+import { logoutUser } from "../actions/authActions";
+import { MenuContext } from "../context/MenuContext";
 
-const Header = ({ isMenuOpen, setIsMenuOpen }) => {
+const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -46,9 +41,9 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
         <div className="flex flex-row items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 
+            <h1
               className="text-lg md:text-xl font-bold text-gray-800 cursor-pointer"
-              onClick={() => navigateTo('/')}
+              onClick={() => navigateTo("/")}
             >
               E-commerce
             </h1>
@@ -56,45 +51,45 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/')}
+              onClick={() => navigateTo("/")}
             >
               Home
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/shop')}
+              onClick={() => navigateTo("/shop")}
             >
               Shop
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/about')}
+              onClick={() => navigateTo("/about")}
             >
               About
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/blog')}
+              onClick={() => navigateTo("/blog")}
             >
               Blog
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/contact')}
+              onClick={() => navigateTo("/contact")}
             >
               Contact
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo('/pages')}
+              onClick={() => navigateTo("/pages")}
             >
               Pages
             </a>
@@ -123,14 +118,14 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
                     <a
                       href="#"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => navigateTo('/profile')}
+                      onClick={() => navigateTo("/profile")}
                     >
                       Profile
                     </a>
                     <a
                       href="#"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => navigateTo('/orders')}
+                      onClick={() => navigateTo("/orders")}
                     >
                       Orders
                     </a>
@@ -147,98 +142,148 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
             ) : (
               <button
                 onClick={handleLoginClick}
-                className="flex items-center space-x-1 text-gray-600 hover:text-gray-800"
+                className={`flex items-center space-x-1 text-[#23A6F0] hover:text-[#1a85c2] ${
+                  isMenuOpen ? "hidden" : "flex"
+                }`}
               >
                 <User className="w-5 h-5" />
-                <span className="hidden md:inline">Login</span>
+                <span className="hidden md:inline">Login / Register</span>
               </button>
             )}
 
-            <button className="text-gray-600 hover:text-gray-800 transition-colors">
+            <button
+              className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors ${
+                isMenuOpen ? "hidden" : "flex"
+              }`}
+            >
               <Search className="w-5 h-5" />
             </button>
 
-            <button 
-              className="text-gray-600 hover:text-gray-800 transition-colors relative flex items-center"
-              onClick={() => navigateTo('/cart')}
+            <button
+              className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
+                isMenuOpen ? "hidden" : "flex"
+              }`}
+              onClick={() => navigateTo("/cart")}
             >
               <ShoppingCart className="w-5 h-5" />
-              <span className="ml-1 text-xs">
-                0
-              </span>
+              <span className="ml-1 text-xs">0</span>
             </button>
 
-            <button 
-              className="text-gray-600 hover:text-gray-800 transition-colors relative flex items-center"
-              onClick={() => navigateTo('/wishlist')}
+            <button
+              className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
+                isMenuOpen ? "hidden" : "flex"
+              }`}
+              onClick={() => navigateTo("/wishlist")}
             >
               <Heart className="w-5 h-5" />
-              <span className="ml-1 text-xs">
-                0
-              </span>
+              <span className="ml-1 text-xs">0</span>
             </button>
-            
+
             {/* Mobile Menu Button */}
             <div className="block md:hidden">
-              <button 
+              <button
                 onClick={toggleMenu}
-                className="p-2 text-gray-600 hover:text-gray-800 focus:outline-none"
+                className="p-2 text-[#23A6F0] hover:text-[#1a85c2] focus:outline-none"
               >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="md:hidden fixed top-[60px] left-0 w-full bg-white shadow-lg">
-            <div className="container mx-auto py-4 flex flex-col items-center">
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/')}
-              >
-                Home
-              </a>
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/shop')}
-              >
-                Shop
-              </a>
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/about')}
-              >
-                About
-              </a>
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/blog')}
-              >
-                Blog
-              </a>
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/contact')}
-              >
-                Contact
-              </a>
-              <a 
-                href="#" 
-                className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                onClick={() => navigateTo('/pages')}
-              >
-                Pages
-              </a>
-            </div>
-          </nav>
-        )}
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <nav className="md:hidden fixed top-[60px] left-0 w-full bg-white shadow-lg">
+              <div className="container mx-auto py-4 flex flex-col items-center">
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/")}
+                >
+                  Home
+                </a>
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/shop")}
+                >
+                  Shop
+                </a>
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/about")}
+                >
+                  About
+                </a>
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/blog")}
+                >
+                  Blog
+                </a>
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/contact")}
+                >
+                  Contact
+                </a>
+                <a
+                  href="#"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                  onClick={() => navigateTo("/pages")}
+                >
+                  Pages
+                </a>
+
+                {/* Mobile Icons Section */}
+                <div className="w-full border-t mt-4 pt-4">
+                  <div className="flex flex-col space-y-6 items-center">
+                    {!isAuthenticated && (
+                      <button
+                        onClick={handleLoginClick}
+                        className="flex items-center space-x-2 text-[#23A6F0] hover:text-[#1a85c2]"
+                      >
+                        <User className="w-6 h-6" />
+                        <span className="text-sm">Login / Register</span>
+                      </button>
+                    )}
+                    <button className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]">
+                      <Search className="w-6 h-6" />
+                    </button>
+                    <button
+                      className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]"
+                      onClick={() => navigateTo("/cart")}
+                    >
+                      <div className="relative">
+                        <ShoppingCart className="w-6 h-6" />
+                        <span className="absolute -top-2 -right-2 text-xs">
+                          0
+                        </span>
+                      </div>
+                    </button>
+                    <button
+                      className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]"
+                      onClick={() => navigateTo("/wishlist")}
+                    >
+                      <div className="relative">
+                        <Heart className="w-6 h-6" />
+                        <span className="absolute -top-2 -right-2 text-xs">
+                          0
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          )}
+        </div>
       </div>
     </header>
   );

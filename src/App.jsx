@@ -9,35 +9,38 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MenuProvider } from "./context/MenuContext";
 
 const App = () => {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/shop/:gender/:categoryName/:categoryId" element={<ShopPage />} />
-          <Route 
-            path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId" 
-            element={<ProductDetailPage />} 
-          />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-        </Routes>
-      </Layout>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-    </Router>
+    <MenuProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/:category/:categoryId" element={<ShopPage />} />
+            <Route 
+              path="/shop/:category/:categoryId/:productNameSlug/:productId" 
+              element={<ProductDetailPage />} 
+            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+          </Routes>
+        </Layout>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+      </Router>
+    </MenuProvider>
   );
 };
 
