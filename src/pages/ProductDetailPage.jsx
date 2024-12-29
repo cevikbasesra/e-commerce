@@ -7,6 +7,7 @@ import {
   selectProductLoading, 
   selectProductError 
 } from '../actions/productActions';
+import { addToCart } from '../actions/cartActions';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Star, Minus, Plus, Heart, Share2, ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
@@ -17,9 +18,9 @@ const ProductDetailPage = () => {
   const dispatch = useDispatch();
   
   // Get product data from Redux store
-  const product = useSelector(state => selectCurrentProduct(state));
-  const loading = useSelector(state => selectProductLoading(state));
-  const error = useSelector(state => selectProductError(state));
+  const product = useSelector(selectCurrentProduct) || null;
+  const loading = useSelector(selectProductLoading);
+  const error = useSelector(selectProductError);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('M');
@@ -39,11 +40,7 @@ const ProductDetailPage = () => {
   }, [product]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -74,7 +71,15 @@ const ProductDetailPage = () => {
   };
 
   const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
+    if (product) {
+      dispatch(addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0]?.url,
+        quantity: 1
+      }));
+    }
   };
 
   const handlePrevImage = () => {
@@ -197,7 +202,10 @@ const ProductDetailPage = () => {
             <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50">
               <Heart className="w-5 h-5" />
             </button>
-            <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50">
+            <button 
+              onClick={handleAddToCart}
+              className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50"
+            >
               <ShoppingCart className="w-5 h-5" />
             </button>
             <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50">

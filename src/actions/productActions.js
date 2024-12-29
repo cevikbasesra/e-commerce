@@ -77,7 +77,7 @@ export const fetchProductById = (productId) => {
 };
 
 // Selectors
-export const selectProducts = state => state.product.products;
-export const selectCurrentProduct = state => state.product.currentProduct;
-export const selectProductLoading = state => state.product.fetchState === 'loading';
-export const selectProductError = state => state.product.fetchState === 'error';
+export const selectProducts = state => state.products.products;
+export const selectCurrentProduct = state => state.products.currentProduct;
+export const selectProductLoading = state => state.products.fetchState === 'loading';
+export const selectProductError = state => state.products.fetchState === 'error';

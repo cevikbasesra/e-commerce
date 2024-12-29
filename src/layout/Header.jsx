@@ -4,18 +4,22 @@ import { useSelector, useDispatch } from "react-redux";
 import Gravatar from "react-gravatar";
 import { ShoppingCart, Search, User, Menu, X, Heart } from "lucide-react";
 import { logoutUser } from "../actions/authActions";
+import { removeFromCart, clearCart } from "../actions/cartActions";
 import { MenuContext } from "../context/MenuContext";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
   const { isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
   // Close dropdown when auth state changes
   useEffect(() => {
     setIsDropdownOpen(false);
+    setIsCartOpen(false);
   }, [isAuthenticated]);
 
   const handleLoginClick = () => {
@@ -23,6 +27,7 @@ const Header = () => {
   };
 
   const handleLogoutClick = () => {
+    dispatch(clearCart());  // Clear cart before logging out
     dispatch(logoutUser());
     navigate("/login");
   };
@@ -39,6 +44,74 @@ const Header = () => {
     navigate(path);
     setIsMenuOpen(false);
     setIsDropdownOpen(false); // Close dropdown when navigating
+  };
+
+  const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+
+  const renderCartDropdown = () => {
+    return (
+      <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg z-50 p-4">
+        <div className="text-lg font-medium mb-4">
+          My Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
+        </div>
+        <div className="max-h-96 overflow-y-auto">
+          {cart.length === 0 ? (
+            <div className="text-center py-4">
+              <p>Your cart is empty</p>
+            </div>
+          ) : (
+            <>
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center gap-4 py-2 border-b">
+                  <img
+                    src={item.image || 'https://via.placeholder.com/300x400?text=No+Image'}
+                    alt={item.name}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium">{item.name}</h3>
+                    <p className="text-gray-500">
+                      {item.quantity} x ${item.price} 
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(removeFromCart(item.id));
+                    }}
+                    className="text-black hover:text-gray-600"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+              <div className="mt-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setIsCartOpen(false);
+                      navigateTo('/cart');
+                    }}
+                    className="flex-1 bg-[#23A6F0] text-white px-4 py-2 rounded hover:bg-[#1a85c2] transition-colors"
+                  >
+                    View Cart
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsCartOpen(false);
+                      navigateTo('/checkout');
+                    }}
+                    className="flex-1 bg-[#252B42] text-white px-4 py-2 rounded hover:bg-[#1e2333] transition-colors"
+                  >
+                    Complete Order
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -165,15 +238,18 @@ const Header = () => {
               <Search className="w-5 h-5" />
             </button>
 
-            <button
-              className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
-                isMenuOpen ? "hidden" : "flex"
-              }`}
-              onClick={() => navigateTo("/cart")}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="ml-1 text-xs">0</span>
-            </button>
+            <div className="relative">
+              <button
+                className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
+                  isMenuOpen ? "hidden" : "flex"
+                }`}
+                onClick={() => setIsCartOpen(!isCartOpen)}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {totalItems > 0 && <span className="ml-1 text-xs">{totalItems}</span>}
+              </button>
+              {isCartOpen && renderCartDropdown()}
+            </div>
 
             <button
               className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
@@ -182,7 +258,6 @@ const Header = () => {
               onClick={() => navigateTo("/wishlist")}
             >
               <Heart className="w-5 h-5" />
-              <span className="ml-1 text-xs">0</span>
             </button>
 
             {/* Mobile Menu Button */}
@@ -268,9 +343,11 @@ const Header = () => {
                     >
                       <div className="relative">
                         <ShoppingCart className="w-6 h-6" />
-                        <span className="absolute -top-2 -right-2 text-xs">
-                          0
-                        </span>
+                        {totalItems > 0 && (
+                          <span className="absolute -top-2 -right-2 text-xs">
+                            {totalItems}
+                          </span>
+                        )}
                       </div>
                     </button>
                     <button
@@ -279,9 +356,6 @@ const Header = () => {
                     >
                       <div className="relative">
                         <Heart className="w-6 h-6" />
-                        <span className="absolute -top-2 -right-2 text-xs">
-                          0
-                        </span>
                       </div>
                     </button>
                   </div>

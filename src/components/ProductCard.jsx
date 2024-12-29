@@ -1,8 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../actions/cartActions';
+import { ShoppingCart } from 'lucide-react';
 
 const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleClick = () => {
     if (routeParams) {
@@ -24,6 +28,17 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
       
       navigate(`/shop/${category}/${categoryId}/${nameSlug}/${product.id}`);
     }
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    dispatch(addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.url,
+      quantity: 1
+    }));
   };
 
   if (viewMode === "single") {
@@ -74,6 +89,14 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
               <div className="w-4 h-4 rounded-full bg-[#23856D] cursor-pointer"></div>
               <div className="w-4 h-4 rounded-full bg-[#E77C40] cursor-pointer"></div>
               <div className="w-4 h-4 rounded-full bg-[#252B42] cursor-pointer"></div>
+            </div>
+            <div className="flex items-center justify-center mt-3 space-x-2">
+              <button
+                onClick={handleAddToCart}
+                className="px-4 py-2 bg-[#23A6F0] text-white rounded hover:bg-[#1a85c2] transition-colors"
+              >
+                Add to Cart
+              </button>
             </div>
           </div>
         </div>
@@ -129,6 +152,14 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
             <div className="w-3 h-3 rounded-full bg-[#E77C40]"></div>
             <div className="w-3 h-3 rounded-full bg-[#252B42]"></div>
           </div>
+          <div className="flex items-center justify-center mt-3 space-x-2">
+            <button
+              onClick={handleAddToCart}
+              className="px-4 py-2 bg-[#23A6F0] text-white rounded hover:bg-[#1a85c2] transition-colors"
+            >
+              Add to Cart
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -181,6 +212,14 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
               <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[#E77C40] cursor-pointer"></div>
               <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[#252B42] cursor-pointer"></div>
             </div>
+            <div className="flex items-center justify-center mt-3 space-x-2">
+              <button
+                onClick={handleAddToCart}
+                className="px-4 py-2 bg-[#23A6F0] text-white rounded hover:bg-[#1a85c2] transition-colors"
+              >
+                Add to Cart
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -232,6 +271,14 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
           <div className="w-4 h-4 rounded-full bg-[#23856D] cursor-pointer"></div>
           <div className="w-4 h-4 rounded-full bg-[#E77C40] cursor-pointer"></div>
           <div className="w-4 h-4 rounded-full bg-[#252B42] cursor-pointer"></div>
+        </div>
+        <div className="flex items-center justify-center mt-3 space-x-2">
+          <button
+            onClick={handleAddToCart}
+            className="px-4 py-2 bg-[#23A6F0] text-white rounded hover:bg-[#1a85c2] transition-colors"
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
