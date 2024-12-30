@@ -2,8 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useSwipeable } from "react-swipeable"; 
 import { removeFromCart, updateCartItem } from "../actions/cartActions";
-import { useSwipeable } from "react-swipeable";
 
 const MobileCartItem = ({
   item,
@@ -12,66 +12,98 @@ const MobileCartItem = ({
   onQuantityChange,
   onRemove,
 }) => {
+  const [swipeProgress, setSwipeProgress] = React.useState(0);
+
   const swipeHandlers = useSwipeable({
+    onSwipeStart: (eventData) => {
+      // Only track horizontal swipes
+      if (Math.abs(eventData.deltaX) > Math.abs(eventData.deltaY)) {
+        setSwipeProgress(0);
+      }
+    },
+    onSwiping: (eventData) => {
+      // Only track horizontal swipes to the left
+      if (eventData.dir === 'Left') {
+        setSwipeProgress(Math.min(Math.max(-eventData.deltaX / 2, 0), 100));
+      }
+    },
     onSwipedLeft: () => {
-      onRemove(item.id);
+      if (swipeProgress > 50) {  // Require significant swipe
+        onRemove(item.id);
+      }
+      setSwipeProgress(0);
+    },
+    onSwipeEnd: () => {
+      setSwipeProgress(0);
     },
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
   });
 
   return (
-    <div
+    <div 
       {...swipeHandlers}
-      className="bg-white rounded-lg shadow p-4 mb-4 relative overflow-hidden"
+      className="relative bg-white rounded-lg shadow p-4 mb-4 overflow-hidden"
     >
-      <div className="absolute inset-y-0 right-0 bg-red-500 w-16 flex items-center justify-center transform translate-x-full transition-transform">
+      {/* Delete Background */}
+      <div 
+        className="absolute inset-y-0 right-0 bg-red-500 w-16 flex items-center justify-center"
+        style={{ 
+          transform: `translateX(${100 - swipeProgress}%)`,
+          opacity: swipeProgress / 100 
+        }}
+      >
         <Trash2 className="w-6 h-6 text-white" />
       </div>
-      <div className="flex items-start space-x-4">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => onSelect(item.id)}
-          className="h-4 w-4 text-[#23A6F0] focus:ring-[#23A6F0] border-gray-300 rounded mt-2"
-        />
-        <img
-          src={item.image || "https://via.placeholder.com/150"}
-          alt={item.name}
-          className="h-20 w-20 object-cover rounded"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start">
-            <h3 className="text-sm font-medium text-gray-900 truncate">
-              {item.name}
-            </h3>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-2 border rounded-md">
-              <button
-                onClick={() =>
-                  item.quantity === 1
-                    ? onRemove(item.id)
-                    : onQuantityChange(item, -1)
-                }
-                className="p-1 hover:bg-gray-100"
-              >
-                {item.quantity === 1 ? (
-                  <Trash2 className="w-4 h-4 text-red-600" />
-                ) : (
-                  <Minus className="w-4 h-4" />
-                )}
-              </button>
-              <span className="text-sm px-2">{item.quantity}</span>
-              <button
-                onClick={() => onQuantityChange(item, 1)}
-                className="p-1 hover:bg-gray-100"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="text-sm text-gray-900">
-              ${(item.price * item.quantity).toFixed(2)}
+
+      {/* Main Content */}
+      <div 
+        className="relative z-10 bg-white" 
+        style={{ 
+          transform: `translateX(-${swipeProgress}%)` 
+        }}
+      >
+        <div className="flex items-start space-x-4">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onSelect}
+            className="h-4 w-4 text-[#23A6F0] focus:ring-[#23A6F0] border-gray-300 rounded mt-2"
+          />
+          <img
+            src={item.image || "https://via.placeholder.com/150"}
+            alt={item.name}
+            className="h-20 w-20 object-cover rounded"
+          />
+          <div className="flex-1">
+            <div className="text-sm font-medium text-gray-900">{item.name}</div>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center space-x-2 border rounded-md">
+                <button
+                  onClick={() =>
+                    item.quantity === 1
+                      ? onRemove(item.id)
+                      : onQuantityChange(item, -1)
+                  }
+                  className="p-1 hover:bg-gray-100"
+                >
+                  {item.quantity === 1 ? (
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  ) : (
+                    <Minus className="w-4 h-4" />
+                  )}
+                </button>
+                <span className="text-sm text-gray-900">{item.quantity}</span>
+                <button
+                  onClick={() => onQuantityChange(item, 1)}
+                  className="p-1 hover:bg-gray-100"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-sm text-gray-900">
+                ${(item.price * item.quantity).toFixed(2)}
+              </div>
             </div>
           </div>
         </div>
