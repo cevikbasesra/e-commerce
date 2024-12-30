@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { useSwipeable } from "react-swipeable"; 
+import { useSwipeable } from "react-swipeable";
 import { removeFromCart, updateCartItem } from "../actions/cartActions";
 
 const MobileCartItem = ({
@@ -23,12 +23,13 @@ const MobileCartItem = ({
     },
     onSwiping: (eventData) => {
       // Only track horizontal swipes to the left
-      if (eventData.dir === 'Left') {
+      if (eventData.dir === "Left") {
         setSwipeProgress(Math.min(Math.max(-eventData.deltaX / 2, 0), 100));
       }
     },
     onSwipedLeft: () => {
-      if (swipeProgress > 50) {  // Require significant swipe
+      if (swipeProgress > 50) {
+        // Require significant swipe
         onRemove(item.id);
       }
       setSwipeProgress(0);
@@ -41,26 +42,26 @@ const MobileCartItem = ({
   });
 
   return (
-    <div 
+    <div
       {...swipeHandlers}
       className="relative bg-white rounded-lg shadow p-4 mb-4 overflow-hidden"
     >
       {/* Delete Background */}
-      <div 
+      <div
         className="absolute inset-y-0 right-0 bg-red-500 w-16 flex items-center justify-center"
-        style={{ 
+        style={{
           transform: `translateX(${100 - swipeProgress}%)`,
-          opacity: swipeProgress / 100 
+          opacity: swipeProgress / 100,
         }}
       >
         <Trash2 className="w-6 h-6 text-white" />
       </div>
 
       {/* Main Content */}
-      <div 
-        className="relative z-10 bg-white" 
-        style={{ 
-          transform: `translateX(-${swipeProgress}%)` 
+      <div
+        className="relative z-10 bg-white"
+        style={{
+          transform: `translateX(-${swipeProgress}%)`,
         }}
       >
         <div className="flex items-start space-x-4">
@@ -117,6 +118,7 @@ const CartPage = () => {
   const navigate = useNavigate();
   const { cart } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = React.useState(new Set());
+  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = React.useState(false);
 
   // Select all items by default when component mounts
   React.useEffect(() => {
@@ -154,10 +156,23 @@ const CartPage = () => {
   };
 
   const calculateSelectedTotal = () => {
-    return cart
+    const subtotal = cart
       .filter((item) => selectedItems.has(item.id))
-      .reduce((total, item) => total + item.price * item.quantity, 0)
-      .toFixed(2);
+      .reduce((total, item) => total + item.price * item.quantity, 0);
+    
+    // Format to 2 decimal places
+    return subtotal.toFixed(2);
+  };
+
+  const calculateShipping = () => {
+    const subtotal = parseFloat(calculateSelectedTotal());
+    return subtotal >= 150 ? 0 : 29.99;
+  };
+
+  const calculateGrandTotal = () => {
+    const subtotal = parseFloat(calculateSelectedTotal());
+    const shipping = calculateShipping();
+    return (subtotal + shipping).toFixed(2);
   };
 
   if (cart.length === 0) {
@@ -197,7 +212,7 @@ const CartPage = () => {
 
       <div className="space-y-4">
         {cart.map((item) => (
-          <MobileCartItem 
+          <MobileCartItem
             key={item.id}
             item={item}
             onRemove={handleRemoveItem}
@@ -209,19 +224,59 @@ const CartPage = () => {
       </div>
 
       {selectedItems.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-top p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <span className="text-gray-600 text-sm">Total:</span>
-              <span className="text-lg font-semibold text-gray-900">
-                ${calculateSelectedTotal()}
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-top z-50">
+          {/* Collapsible Order Summary */}
+          <div
+            className={`bg-white px-4 py-3 border-t transition-all duration-300 ${
+              isOrderSummaryOpen ? "max-h-80" : "max-h-0 overflow-hidden"
+            }`}
+          >
+            <div className="space-y-3 pb-2">
+              <div className="flex justify-between text-gray-600">
+                <span>Products Total</span>
+                <span className="text-gray-900">${calculateSelectedTotal()}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Shipping Total</span>
+                <span className="text-gray-900">${calculateShipping()}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span className="text-sm">Free Shipping Over $150 (Seller Covers)</span>
+                <span className="text-[#23A6F0]">
+                  ${calculateShipping() === 0 ? '-29.99' : '0.00'}
+                </span>
+              </div>
+              {/* Discount Code Section */}
+              <button className="w-full py-2 px-3 mt-2 border border-gray-300 rounded-lg text-gray-600 flex items-center justify-between hover:bg-gray-50">
+                <span className="flex items-center text-sm">
+                  <span className="text-[#23A6F0] text-lg mr-2">+</span>
+                  ENTER DISCOUNT CODE
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Total and Checkout Button */}
+          <div className="flex items-center gap-4 p-4 bg-white border-t">
+            <div 
+              className="flex flex-col cursor-pointer"
+              onClick={() => setIsOrderSummaryOpen(!isOrderSummaryOpen)}
+            >
+              <div className="flex items-center">
+                <span className="text-gray-600 text-sm">Total:</span>
+                <span className="text-[#23A6F0] ml-1 text-xs">
+                  {isOrderSummaryOpen ? '▼' : '▲'}
+                </span>
+              </div>
+              <span className="text-lg font-semibold text-[#23A6F0]">
+                ${calculateGrandTotal()}
               </span>
             </div>
             <button
               onClick={() => navigate("/checkout")}
-              className="flex-1 py-2 px-4 bg-[#23A6F0] text-white rounded-md hover:bg-[#1f95d8]"
+              className="flex-1 py-2 px-4 bg-[#23A6F0] text-white rounded-md hover:bg-[#1a85c2]"
             >
-              Proceed to Checkout
+              Create Order
             </button>
           </div>
         </div>
@@ -252,7 +307,7 @@ const CartPage = () => {
 
           <div className="space-y-4">
             {cart.map((item) => (
-              <div 
+              <div
                 key={item.id}
                 className="bg-white rounded-lg shadow p-4 relative overflow-hidden"
               >
@@ -267,7 +322,7 @@ const CartPage = () => {
                   </div>
                   <div className="col-span-4 flex items-center">
                     <img
-                      src={item.image || 'https://via.placeholder.com/150'}
+                      src={item.image || "https://via.placeholder.com/150"}
                       alt={item.name}
                       className="h-16 w-16 object-cover rounded mr-4"
                     />
@@ -283,7 +338,9 @@ const CartPage = () => {
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="text-sm text-gray-900">{item.quantity}</span>
+                      <span className="text-sm text-gray-900">
+                        {item.quantity}
+                      </span>
                       <button
                         onClick={() => handleQuantityChange(item, 1)}
                         className="p-1 hover:bg-gray-100"
@@ -312,36 +369,46 @@ const CartPage = () => {
 
       {/* Order Summary */}
       <div className="w-80 h-fit bg-white rounded-lg shadow p-6 sticky top-4">
-        <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Selected Items:</span>
-            <span>{selectedItems.size}</span>
+        <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
+        <div className="space-y-4">
+          <div className="flex justify-between text-gray-600">
+            <span>Products Total</span>
+            <span className="text-gray-900">${calculateSelectedTotal()}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Total Items:</span>
-            <span>
-              {cart.reduce(
-                (sum, item) =>
-                  sum + (selectedItems.has(item.id) ? item.quantity : 0),
-                0
-              )}
+          <div className="flex justify-between text-gray-600">
+            <span>Shipping Total</span>
+            <span className="text-gray-900">${calculateShipping()}</span>
+          </div>
+          <div className="flex justify-between text-gray-600">
+            <span>Free Shipping Over $150 (Seller Covers)</span>
+            <span className="text-[#23A6F0]">${calculateShipping() === 0 ? '-29.99' : '0.00'}</span>
+          </div>
+          <div className="flex justify-between font-medium text-lg pt-4 border-t">
+            <span>Total</span>
+            <span className="text-[#23A6F0] font-semibold">
+              ${calculateGrandTotal()}
             </span>
           </div>
-          <div className="flex justify-between font-medium text-lg pt-3 border-t">
-            <span>Total:</span>
-            <span className="text-gray-900 font-semibold">${calculateSelectedTotal()}</span>
-          </div>
+
+          {/* Discount Code Section */}
+          <button className="w-full py-3 px-4 mt-4 border border-gray-300 rounded-lg text-gray-600 flex items-center justify-between hover:bg-gray-50">
+            <span className="flex items-center">
+              <span className="text-[#23A6F0] text-xl mr-2">+</span>
+              ENTER DISCOUNT CODE
+            </span>
+          </button>
+
+          {/* Create Order Button */}
           <button
             onClick={() => navigate("/checkout")}
             disabled={selectedItems.size === 0}
-            className={`w-full py-2 px-4 rounded-md text-white mt-4 ${
+            className={`w-full py-3 px-4 rounded-lg text-white mt-4 text-lg font-medium ${
               selectedItems.size === 0
                 ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#23A6F0] hover:bg-[#1f95d8]"
+                : "bg-[#23A6F0] hover:bg-[#1a85c2]"
             }`}
           >
-            Proceed to Checkout
+            Create Order
           </button>
         </div>
       </div>
@@ -349,7 +416,7 @@ const CartPage = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mb-32 md:mb-8">
       <h2 className="text-2xl font-semibold mb-6">
         Shopping Cart ({cart.length} items)
       </h2>

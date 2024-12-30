@@ -236,6 +236,9 @@ const Header = () => {
               }`}
             >
               <Search className="w-5 h-5" />
+              <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
+                Search
+              </span>
             </button>
 
             <div className="relative">
@@ -245,8 +248,17 @@ const Header = () => {
                 }`}
                 onClick={() => setIsCartOpen(!isCartOpen)}
               >
-                <ShoppingCart className="w-5 h-5" />
-                {totalItems > 0 && <span className="ml-1 text-xs">{totalItems}</span>}
+                <div className="relative">
+                  <ShoppingCart className="w-5 h-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 text-[10px] bg-[#23A6F0] text-white rounded-full px-1">
+                      {totalItems}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
+                  Cart
+                </span>
               </button>
               {isCartOpen && renderCartDropdown()}
             </div>
@@ -258,6 +270,9 @@ const Header = () => {
               onClick={() => navigateTo("/wishlist")}
             >
               <Heart className="w-5 h-5" />
+              <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
+                Wishlist
+              </span>
             </button>
 
             {/* Mobile Menu Button */}
@@ -334,29 +349,32 @@ const Header = () => {
                         <span className="text-sm">Login / Register</span>
                       </button>
                     )}
-                    <button className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]">
+                    <button className="flex items-center text-[#23A6F0] hover:text-[#1a85c2]">
                       <Search className="w-6 h-6" />
+                      <span className="ml-2">Search</span>
                     </button>
                     <button
-                      className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]"
+                      className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center`}
                       onClick={() => navigateTo("/cart")}
                     >
                       <div className="relative">
                         <ShoppingCart className="w-6 h-6" />
                         {totalItems > 0 && (
-                          <span className="absolute -top-2 -right-2 text-xs">
+                          <span className="absolute -top-2 -right-2 text-[10px] bg-[#23A6F0] text-white rounded-full px-1">
                             {totalItems}
                           </span>
                         )}
                       </div>
+                      <span className="ml-2">Cart</span>
                     </button>
                     <button
-                      className="flex flex-col items-center text-[#23A6F0] hover:text-[#1a85c2]"
+                      className="flex items-center text-[#23A6F0] hover:text-[#1a85c2]"
                       onClick={() => navigateTo("/wishlist")}
                     >
                       <div className="relative">
                         <Heart className="w-6 h-6" />
                       </div>
+                      <span className="ml-2">Wishlist</span>
                     </button>
                   </div>
                 </div>
