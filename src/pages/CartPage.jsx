@@ -14,9 +14,7 @@ const MobileCartItem = ({
 }) => {
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
-      if (item.quantity > 1) {
-        onRemove(item.id);
-      }
+      onRemove(item.id);
     },
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
@@ -27,11 +25,9 @@ const MobileCartItem = ({
       {...swipeHandlers}
       className="bg-white rounded-lg shadow p-4 mb-4 relative overflow-hidden"
     >
-      {item.quantity > 1 && (
-        <div className="absolute inset-y-0 right-0 bg-red-500 w-16 flex items-center justify-center transform translate-x-full transition-transform">
-          <Trash2 className="w-6 h-6 text-white" />
-        </div>
-      )}
+      <div className="absolute inset-y-0 right-0 bg-red-500 w-16 flex items-center justify-center transform translate-x-full transition-transform">
+        <Trash2 className="w-6 h-6 text-white" />
+      </div>
       <div className="flex items-start space-x-4">
         <input
           type="checkbox"
@@ -169,55 +165,14 @@ const CartPage = () => {
 
       <div className="space-y-4">
         {cart.map((item) => (
-          <div 
+          <MobileCartItem 
             key={item.id}
-            className="bg-white rounded-lg shadow p-4 mb-4 relative overflow-hidden"
-          >
-            <div className="flex items-start space-x-4">
-              <input
-                type="checkbox"
-                checked={selectedItems.has(item.id)}
-                onChange={() => handleItemSelect(item.id)}
-                className="h-4 w-4 text-[#23A6F0] focus:ring-[#23A6F0] border-gray-300 rounded mt-2"
-              />
-              <img
-                src={item.image || "https://via.placeholder.com/150"}
-                alt={item.name}
-                className="h-20 w-20 object-cover rounded"
-              />
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center space-x-2 border rounded-md">
-                    <button
-                      onClick={() =>
-                        item.quantity === 1
-                          ? handleRemoveItem(item.id)
-                          : handleQuantityChange(item, -1)
-                      }
-                      className="p-1 hover:bg-gray-100"
-                    >
-                      {item.quantity === 1 ? (
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      ) : (
-                        <Minus className="w-4 h-4" />
-                      )}
-                    </button>
-                    <span className="text-sm text-gray-900">{item.quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(item, 1)}
-                      className="p-1 hover:bg-gray-100"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="text-sm text-gray-900">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            item={item}
+            onRemove={handleRemoveItem}
+            onSelect={() => handleItemSelect(item.id)}
+            isSelected={selectedItems.has(item.id)}
+            onQuantityChange={handleQuantityChange}
+          />
         ))}
       </div>
 
