@@ -12,7 +12,7 @@ export const removeFromCart = (productId) => ({
 
 export const updateCartItem = (productId, quantity) => ({
   type: types.UPDATE_CART_ITEM,
-  payload: { id: productId, quantity },
+  payload: { productId, quantity },
 });
 
 export const setCart = (cart) => ({
@@ -26,10 +26,10 @@ export const clearCart = () => ({
 
 export const setPayment = (payment) => ({
   type: types.SET_PAYMENT,
-  payload: payment
+  payload: payment,
 });
 
 export const setAddress = (address) => ({
   type: types.SET_ADDRESS,
-  payload: address
+  payload: address,
 });

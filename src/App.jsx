@@ -8,6 +8,7 @@ import ShopPage from "./pages/ShopPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import CartPage from "./pages/CartPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./context/MenuContext";
@@ -48,6 +49,7 @@ const App = () => {
             />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/cart" element={<CartPage />} />
           </Routes>
         </Layout>
         <ToastContainer position="top-right" autoClose={3000} />
