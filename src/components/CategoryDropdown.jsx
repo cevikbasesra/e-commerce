@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { selectCategories } from '../actions/categoryActions';
+import { selectProducts } from '../actions/productActions';
 
 const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const categories = useSelector(selectCategories);
+  const categories = useSelector(selectProducts);
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {

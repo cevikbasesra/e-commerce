@@ -207,7 +207,7 @@ const ShopPage = () => {
         <div className="hidden md:grid md:grid-cols-3 md:items-center mb-6 max-w-7xl mx-auto px-8">
           {/* Results Count - Left */}
           <p className="text-gray-600">
-            Showing all {totalProducts}{" "}
+            Showing {currentPage * ITEMS_PER_PAGE + 1}-{Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalProducts)} of {totalProducts}{" "}
             {totalProducts === 1 ? "result" : "results"}
           </p>
 
@@ -352,7 +352,7 @@ const ShopPage = () => {
           {/* Results Count */}
           <div className="mb-4 flex justify-center">
             <p className="text-gray-600">
-              Showing all {totalProducts}{" "}
+              Showing {currentPage * ITEMS_PER_PAGE + 1}-{Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalProducts)} of {totalProducts}{" "}
               {totalProducts === 1 ? "result" : "results"}
             </p>
           </div>

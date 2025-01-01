@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Gravatar from "react-gravatar";
-import { ShoppingCart, Search, User, Menu, X, Heart } from "lucide-react";
+import { ShoppingCart, Search, User, Menu, X, Heart, ChevronDown } from "lucide-react";
 import { logoutUser } from "../actions/authActions";
 import { removeFromCart, clearCart } from "../actions/cartActions";
 import { MenuContext } from "../context/MenuContext";
@@ -130,58 +130,51 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a
-              href="#"
+            <Link
+              to="/"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/")}
             >
               Home
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/shop"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/shop")}
             >
               Shop
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/about"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/about")}
             >
               About
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/blog"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/blog")}
             >
               Blog
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/contact"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/contact")}
             >
               Contact
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/pages"
               className="text-gray-600 hover:text-gray-800 transition-colors"
-              onClick={() => navigateTo("/pages")}
             >
               Pages
-            </a>
+            </Link>
           </nav>
 
           {/* Icons Section */}
           <div className="flex items-center space-x-4">
             {/* User Section */}
             {isAuthenticated && user ? (
-              <div className="relative">
+              <div className="relative group">
                 <div
-                  className="flex items-center cursor-pointer"
-                  onClick={toggleDropdown}
+                  className="flex items-center cursor-pointer gap-2"
                 >
                   <Gravatar
                     email={user.email || `user-${user.id}@example.com`}
@@ -189,34 +182,34 @@ const Header = () => {
                     className="rounded-full border-2 border-transparent hover:border-primary transition-all"
                     default="mp"
                   />
+                  {isAuthenticated && user?.name && (
+                    <span className="text-sm font-semibold text-[#23A6F0]">Hello, {user.name}</span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 transition-transform group-hover:rotate-180 text-[#23A6F0]`} />
                 </div>
 
                 {/* User Dropdown */}
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => navigateTo("/profile")}
-                    >
-                      Profile
-                    </a>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => navigateTo("/orders")}
-                    >
-                      Orders
-                    </a>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={handleLogoutClick}
-                    >
-                      Logout
-                    </a>
-                  </div>
-                )}
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-2xl border-2 border-gray-100 py-1 z-50 hidden group-hover:block">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
+                    onClick={handleLogoutClick}
+                  >
+                    Logout
+                  </Link>
+                </div>
               </div>
             ) : (
               <button
@@ -294,48 +287,42 @@ const Header = () => {
           {isMenuOpen && (
             <nav className="md:hidden fixed top-[60px] left-0 w-full bg-white shadow-lg">
               <div className="container mx-auto py-4 flex flex-col items-center">
-                <a
-                  href="#"
+                <Link
+                  to="/"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/")}
                 >
                   Home
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/shop"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/shop")}
                 >
                   Shop
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/about"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/about")}
                 >
                   About
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/blog"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/blog")}
                 >
                   Blog
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/contact"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/contact")}
                 >
                   Contact
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/pages"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
-                  onClick={() => navigateTo("/pages")}
                 >
                   Pages
-                </a>
+                </Link>
 
                 {/* Mobile Icons Section */}
                 <div className="w-full border-t mt-4 pt-4">

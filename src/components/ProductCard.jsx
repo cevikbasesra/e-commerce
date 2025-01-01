@@ -169,7 +169,7 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
     return (
       <div 
         onClick={handleClick}
-        className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg flex flex-col"
+        className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg flex flex-col h-full"
       >
         <div className="relative aspect-square">
           <img
@@ -179,7 +179,7 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
           />
         </div>
 
-        <div className="p-3 md:p-4 text-center">
+        <div className="p-3 md:p-4 text-center flex flex-col flex-grow">
           <h3 className="text-sm md:text-lg font-semibold text-gray-800 truncate">
             {product.name}
           </h3>
@@ -188,7 +188,7 @@ const ProductCard = ({ product, routeParams, viewMode = "single" }) => {
             {product.description}
           </p>
 
-          <div className="mt-2 md:mt-4">
+          <div className="mt-auto pt-4">
             <div className="flex items-center justify-center space-x-2 md:space-x-3">
               {product?.discount !== undefined && product.discount !== 0 ? (
                 <>

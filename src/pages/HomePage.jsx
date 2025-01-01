@@ -179,8 +179,8 @@ const HomePage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {bestsellerProducts.map((product) => (
-              <div key={product.id} className="relative">
-                <ProductCard product={product} />
+              <div key={product.id} className="h-full">
+                <ProductCard product={product} viewMode="grid" />
               </div>
             ))}
           </div>
