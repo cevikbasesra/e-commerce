@@ -11,6 +11,8 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
+import CreateOrderPage from "./pages/CreateOrderPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MenuProvider } from "./context/MenuContext";
@@ -33,6 +35,14 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route
+                path="/create-order"
+                element={
+                  <ProtectedRoute>
+                    <CreateOrderPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
           <ToastContainer position="top-right" autoClose={3000} />

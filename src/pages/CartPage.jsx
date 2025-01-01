@@ -273,8 +273,13 @@ const CartPage = () => {
               </span>
             </div>
             <button
-              onClick={() => navigate("/checkout")}
-              className="flex-1 py-2 px-4 bg-[#23A6F0] text-white rounded-md hover:bg-[#1a85c2]"
+              onClick={() => navigate('/create-order')}
+              disabled={selectedItems.size === 0}
+              className={`w-full mt-4 py-3 px-4 rounded-lg text-white font-medium
+                ${selectedItems.size === 0 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-[#23A6F0] hover:bg-[#1f95d8]'
+                }`}
             >
               Create Order
             </button>
@@ -400,12 +405,12 @@ const CartPage = () => {
 
           {/* Create Order Button */}
           <button
-            onClick={() => navigate("/checkout")}
+            onClick={() => navigate('/create-order')}
             disabled={selectedItems.size === 0}
             className={`w-full py-3 px-4 rounded-lg text-white mt-4 text-lg font-medium ${
               selectedItems.size === 0
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#23A6F0] hover:bg-[#1a85c2]"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#23A6F0] hover:bg-[#1f95d8]"
             }`}
           >
             Create Order
