@@ -8,8 +8,9 @@ import {
   selectProductError 
 } from '../actions/productActions';
 import { addToCart } from '../actions/cartActions';
+import { addToWishlist, removeFromWishlist } from '../actions/wishlistActions';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Star, Minus, Plus, Heart, Share2, ShoppingCart, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Minus, Plus, Heart, Share2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 
 const ProductDetailPage = () => {
@@ -21,6 +22,8 @@ const ProductDetailPage = () => {
   const product = useSelector(selectCurrentProduct) || null;
   const loading = useSelector(selectProductLoading);
   const error = useSelector(selectProductError);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+  const isInWishlist = wishlistItems.some((item) => item.id === product?.id);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('M');
@@ -79,6 +82,21 @@ const ProductDetailPage = () => {
         image: product.images[0]?.url,
         quantity: 1
       }));
+    }
+  };
+
+  const handleWishlistClick = () => {
+    if (product) {
+      if (isInWishlist) {
+        dispatch(removeFromWishlist(product.id));
+      } else {
+        dispatch(addToWishlist({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.images[0]?.url,
+        }));
+      }
     }
   };
 
@@ -150,7 +168,8 @@ const ProductDetailPage = () => {
             {product.name}
           </h1>
 
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-xl font-medium">{product.rating.toFixed(1)}</span>
             <div className="flex gap-1">
               {[...Array(5)].map((_, index) => (
                 <Star
@@ -163,7 +182,8 @@ const ProductDetailPage = () => {
                 />
               ))}
             </div>
-            <span className="text-gray-600">{product.reviews} Reviews</span>
+            <span className="text-gray-400 mx-1">•</span>
+            <span className="text-gray-600">20 Reviews</span>
           </div>
 
           <div className="mb-6">
@@ -173,7 +193,11 @@ const ProductDetailPage = () => {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium">Availability :</span>
-              <span className="text-primary">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+              {product.stock > 0 ? (
+                <span className="text-[#23856D]">{product.stock} in Stock</span>
+              ) : (
+                <span className="text-red-500">Out of Stock</span>
+              )}
             </div>
           </div>
 
@@ -196,20 +220,17 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="flex gap-4">
-            <button className="flex-1 bg-primary text-white py-3 px-6 rounded-md hover:bg-primary-dark">
-              Select Options
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50">
-              <Heart className="w-5 h-5" />
-            </button>
             <button 
               onClick={handleAddToCart}
-              className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50"
+              className="bg-[#23A6F0] text-white py-3 px-6 rounded-md hover:bg-[#1a85c2] transition-colors w-48"
             >
-              <ShoppingCart className="w-5 h-5" />
+              Add to Cart
             </button>
-            <button className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50">
-              <Eye className="w-5 h-5" />
+            <button 
+              onClick={handleWishlistClick}
+              className="p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current text-[#23A6F0]' : ''}`} />
             </button>
           </div>
         </div>

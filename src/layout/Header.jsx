@@ -1,26 +1,38 @@
-import React, { useState, useContext, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Gravatar from "react-gravatar";
 import { ShoppingCart, Search, User, Menu, X, Heart, ChevronDown } from "lucide-react";
 import { logoutUser } from "../actions/authActions";
 import { removeFromCart, clearCart } from "../actions/cartActions";
+import { removeFromWishlist } from "../actions/wishlistActions";
 import { MenuContext } from "../context/MenuContext";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
   const { isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
   // Close dropdown when auth state changes
   useEffect(() => {
     setIsDropdownOpen(false);
     setIsCartOpen(false);
+    setIsWishlistOpen(false);
   }, [isAuthenticated]);
+
+  // Close dropdowns when location changes
+  useEffect(() => {
+    setIsCartOpen(false);
+    setIsWishlistOpen(false);
+    setIsDropdownOpen(false);
+  }, [location]);
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -114,6 +126,47 @@ const Header = () => {
     );
   };
 
+  const renderWishlistDropdown = () => {
+    return (
+      <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-100 p-4">
+        {wishlistItems.length === 0 ? (
+          <p className="text-gray-500 text-center">Your wishlist is empty</p>
+        ) : (
+          <>
+            {wishlistItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-4 mb-4">
+                <img
+                  src={item.images?.[0] || item.image || 'https://via.placeholder.com/150'}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium">{item.name}</h3>
+                  <p className="text-[#23A6F0] font-bold">
+                    ${item.price}
+                  </p>
+                </div>
+                <button
+                  onClick={() => dispatch(removeFromWishlist(item.id))}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+            <Link
+              to="/wishlist"
+              className="block w-full text-center bg-[#23A6F0] text-white py-2 rounded-md hover:bg-[#1a85c2] transition-colors mt-4"
+              onClick={() => setIsWishlistOpen(false)}
+            >
+              View Wishlist
+            </Link>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <header className="bg-white shadow-sm p-2 md:p-4 fixed w-full top-0 z-50">
       <div className="container mx-auto">
@@ -172,51 +225,53 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* User Section */}
             {isAuthenticated && user ? (
-              <div className="relative group">
-                <div
-                  className="flex items-center cursor-pointer gap-2"
+              <div className="relative">
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 text-[#23A6F0] hover:text-[#1a85c2] transition-colors"
                 >
-                  <Gravatar
-                    email={user.email || `user-${user.id}@example.com`}
-                    size={32}
-                    className="rounded-full border-2 border-transparent hover:border-primary transition-all"
-                    default="mp"
-                  />
-                  {isAuthenticated && user?.name && (
-                    <span className="text-sm font-semibold text-[#23A6F0]">Hello, {user.name}</span>
-                  )}
-                  <ChevronDown className={`w-4 h-4 transition-transform group-hover:rotate-180 text-[#23A6F0]`} />
-                </div>
+                  <div className="flex items-center">
+                    <Gravatar
+                      email={user?.email || ""}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="ml-2">Hello, {user?.name?.split(" ")[0]}</span>
+                    <ChevronDown className={`w-4 h-4 ml-1 transform transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
 
-                {/* User Dropdown */}
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-2xl border-2 border-gray-100 py-1 z-50 hidden group-hover:block">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/orders"
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
-                  >
-                    Orders
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#23A6F0] hover:bg-gray-50"
-                    onClick={handleLogoutClick}
-                  >
-                    Logout
-                  </Link>
-                </div>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      Orders
+                    </Link>
+                    <button
+                      onClick={() => {
+                        dispatch(logoutUser());
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button
                 onClick={handleLoginClick}
-                className={`flex items-center space-x-1 text-[#23A6F0] hover:text-[#1a85c2] ${
-                  isMenuOpen ? "hidden" : "flex"
-                }`}
+                className="flex items-center gap-2 text-[#23A6F0] hover:text-[#1a85c2] transition-colors"
               >
                 <User className="w-5 h-5" />
                 <span className="hidden md:inline">Login / Register</span>
@@ -229,7 +284,7 @@ const Header = () => {
               }`}
             >
               <Search className="w-5 h-5" />
-              <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
+              <span className="hidden md:inline ml-3 text-[#23A6F0] hover:text-[#1a85c2]">
                 Search
               </span>
             </button>
@@ -249,24 +304,39 @@ const Header = () => {
                     </span>
                   )}
                 </div>
-                <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
+                <span className="hidden md:inline ml-3 text-[#23A6F0] hover:text-[#1a85c2]">
                   Cart
                 </span>
               </button>
               {isCartOpen && renderCartDropdown()}
             </div>
 
-            <button
-              className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
-                isMenuOpen ? "hidden" : "flex"
-              }`}
-              onClick={() => navigateTo("/wishlist")}
-            >
-              <Heart className="w-5 h-5" />
-              <span className="hidden md:inline ml-1 text-[#23A6F0] hover:text-[#1a85c2]">
-                Wishlist
-              </span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsWishlistOpen(!isWishlistOpen);
+                  setIsCartOpen(false);
+                }}
+                className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center ${
+                  isMenuOpen ? "hidden" : "flex"
+                }`}
+              >
+                <div className="relative flex items-center">
+                  <div className="relative">
+                    <Heart className="w-5 h-5" />
+                    {wishlistItems.length > 0 && (
+                      <span className="absolute -top-2 -right-2 text-[10px] bg-[#23A6F0] text-white rounded-full px-1">
+                        {wishlistItems.length}
+                      </span>
+                    )}
+                  </div>
+                  <span className="hidden md:inline ml-3 text-[#23A6F0] hover:text-[#1a85c2]">
+                    Wishlist
+                  </span>
+                </div>
+              </button>
+              {isWishlistOpen && renderWishlistDropdown()}
+            </div>
 
             {/* Mobile Menu Button */}
             <div className="block md:hidden">
@@ -338,7 +408,7 @@ const Header = () => {
                     )}
                     <button className="flex items-center text-[#23A6F0] hover:text-[#1a85c2]">
                       <Search className="w-6 h-6" />
-                      <span className="ml-2">Search</span>
+                      <span className="ml-3">Search</span>
                     </button>
                     <button
                       className={`flex text-[#23A6F0] hover:text-[#1a85c2] transition-colors relative items-center`}
@@ -352,7 +422,7 @@ const Header = () => {
                           </span>
                         )}
                       </div>
-                      <span className="ml-2">Cart</span>
+                      <span className="ml-3">Cart</span>
                     </button>
                     <button
                       className="flex items-center text-[#23A6F0] hover:text-[#1a85c2]"
@@ -360,8 +430,13 @@ const Header = () => {
                     >
                       <div className="relative">
                         <Heart className="w-6 h-6" />
+                        {wishlistItems.length > 0 && (
+                          <span className="absolute -top-2 -right-2 text-[10px] bg-[#23A6F0] text-white rounded-full px-1">
+                            {wishlistItems.length}
+                          </span>
+                        )}
                       </div>
-                      <span className="ml-2">Wishlist</span>
+                      <span className="ml-3">Wishlist</span>
                     </button>
                   </div>
                 </div>

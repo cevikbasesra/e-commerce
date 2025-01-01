@@ -4,6 +4,7 @@ import authReducer from '../reducers/authReducer';
 import productReducer from '../reducers/productReducer';
 import cartReducer from '../reducers/cartReducer';
 import clientReducer from '../reducers/clientReducer';
+import wishlistReducer from '../reducers/wishlistReducer';
 
 // Load state from storage based on Remember Me
 const loadState = () => {
@@ -30,7 +31,9 @@ const loadState = () => {
 const saveState = (state) => {
   try {
     const stateToSave = {
-      auth: state.auth
+      auth: state.auth,
+      cart: state.cart,
+      wishlist: state.wishlist
     };
 
     // If there's a token in localStorage, we're using Remember Me
@@ -52,6 +55,7 @@ const rootReducer = combineReducers({
   products: productReducer,
   cart: cartReducer,
   client: clientReducer,
+  wishlist: wishlistReducer,
 });
 
 const persistedState = loadState();
