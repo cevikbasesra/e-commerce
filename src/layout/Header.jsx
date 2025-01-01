@@ -7,11 +7,14 @@ import { logoutUser } from "../actions/authActions";
 import { removeFromCart, clearCart } from "../actions/cartActions";
 import { removeFromWishlist } from "../actions/wishlistActions";
 import { MenuContext } from "../context/MenuContext";
+import api, { endpoints } from "../services/apiService";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isShopOpen, setIsShopOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -20,18 +23,39 @@ const Header = () => {
   const { items: wishlistItems } = useSelector((state) => state.wishlist);
   const { isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
-  // Close dropdown when auth state changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get(endpoints.categories);
+        // Get unique categories by title
+        const uniqueCategories = response.data.reduce((acc, current) => {
+          const x = acc.find(item => item.title === current.title);
+          if (!x) {
+            return acc.concat([current]);
+          } else if (current.rating > x.rating) {
+            return acc.map(item => item.title === current.title ? current : item);
+          }
+          return acc;
+        }, []);
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     setIsDropdownOpen(false);
     setIsCartOpen(false);
     setIsWishlistOpen(false);
   }, [isAuthenticated]);
 
-  // Close dropdowns when location changes
   useEffect(() => {
     setIsCartOpen(false);
     setIsWishlistOpen(false);
     setIsDropdownOpen(false);
+    setIsShopOpen(false);
   }, [location]);
 
   const handleLoginClick = () => {
@@ -189,12 +213,51 @@ const Header = () => {
             >
               Home
             </Link>
-            <Link
-              to="/shop"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Shop
-            </Link>
+            <div className="relative">
+              <button
+                className="flex items-center gap-1 text-gray-700 hover:text-gray-900"
+                onClick={() => setIsShopOpen(!isShopOpen)}
+              >
+                Shop
+                <ChevronDown size={16} />
+              </button>
+              {isShopOpen && (
+                <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+                  <div className="py-2">
+                    <div className="px-4 py-2 font-medium text-gray-900">Kadın</div>
+                    {categories
+                      .filter(cat => cat.gender === "k")
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => {
+                            navigate(`/shop/${category.title.toLowerCase()}/${category.id}`);
+                            setIsShopOpen(false);
+                          }}
+                          className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                        >
+                          {category.title}
+                        </button>
+                      ))}
+                    <div className="px-4 py-2 font-medium text-gray-900 mt-2">Erkek</div>
+                    {categories
+                      .filter(cat => cat.gender === "e")
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => {
+                            navigate(`/shop/${category.title.toLowerCase()}/${category.id}`);
+                            setIsShopOpen(false);
+                          }}
+                          className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                        >
+                          {category.title}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <Link
               to="/about"
               className="text-gray-600 hover:text-gray-800 transition-colors"

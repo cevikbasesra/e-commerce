@@ -97,8 +97,25 @@ const ShopPage = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get(endpoints.categories);
-      setCategories(response.data);
-      setTotalCategories(response.data.length);
+      
+      // Get unique categories by title and take top 5 by rating
+      const uniqueCategories = response.data.reduce((acc, current) => {
+        const x = acc.find(item => item.title === current.title);
+        if (!x) {
+          return acc.concat([current]);
+        } else if (current.rating > x.rating) {
+          // If we find a duplicate title with higher rating, replace the existing one
+          return acc.map(item => item.title === current.title ? current : item);
+        }
+        return acc;
+      }, []);
+
+      const sortedCategories = uniqueCategories
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 5);
+
+      setCategories(sortedCategories);
+      setTotalCategories(sortedCategories.length);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -155,6 +172,10 @@ const ShopPage = () => {
 
   const pageCount = Math.max(Math.ceil(totalProducts / ITEMS_PER_PAGE), 1);
 
+  const handleCategoryClick = (cat) => {
+    navigate(`/shop/${cat.name.toLowerCase()}/${cat.id}`);
+  };
+
   return (
     <div className="container mx-auto">
       {/* Categories Section */}
@@ -171,28 +192,30 @@ const ShopPage = () => {
               <h2 className="text-3xl font-semibold">Shop</h2>
             </div>
             <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold mb-4">TOP CATEGORIES</h2>
+              <p className="text-gray-600">
+                Discover our highest-rated and most popular shopping categories
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {categories
-                .filter(category => categoryProducts[category.id] > 0)
-                .map((category) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {categories.map((category) => (
                 <div
                   key={category.id}
+                  className="relative cursor-pointer group overflow-hidden h-[300px] shadow-md hover:shadow-xl transition-all duration-300"
                   onClick={() => navigate(`/shop/${category.title.toLowerCase()}/${category.id}`)}
-                  className="relative group cursor-pointer overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 aspect-square"
                 >
                   <img
-                    src={category.img}
+                    src={category.img || `https://via.placeholder.com/400x300?text=${category.title}`}
                     alt={category.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center">
-                    <h3 className="text-white text-base font-semibold text-center px-2 mb-1">
-                      {category.title}
+                  <div className="absolute inset-0 bg-black bg-opacity-20 transition-opacity duration-300 group-hover:bg-opacity-10 flex flex-col items-center justify-center text-white">
+                    <h3 className="text-xl font-semibold mb-2">
+                      {category.title ? category.title.toUpperCase() : 'CATEGORY'}
                     </h3>
-                    <p className="text-white text-xs">
-                      {categoryProducts[category.id]} items
-                    </p>
+                    <div className="text-sm">
+                      {category.rating.toFixed(1)}★
+                    </div>
                   </div>
                 </div>
               ))}
