@@ -249,21 +249,30 @@ const Header = () => {
             </div>
             <Link
               to="/about"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
+              className="text-gray-700 hover:text-gray-900"
+              onClick={() => setIsMenuOpen(false)}
             >
               About
+            </Link>
+            <Link
+              to="/team"
+              className="text-gray-700 hover:text-gray-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Team
+            </Link>
+            <Link
+              to="/contact"
+              className="text-gray-700 hover:text-gray-900"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </Link>
             <Link
               to="/blog"
               className="text-gray-600 hover:text-gray-800 transition-colors"
             >
               Blog
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Contact
             </Link>
             <Link
               to="/pages"
@@ -428,16 +437,22 @@ const Header = () => {
                   About
                 </Link>
                 <Link
-                  to="/blog"
+                  to="/team"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
                 >
-                  Blog
+                  Team
                 </Link>
                 <Link
                   to="/contact"
                   className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
                 >
                   Contact
+                </Link>
+                <Link
+                  to="/blog"
+                  className="block py-2 text-gray-600 hover:text-gray-800 text-center w-full"
+                >
+                  Blog
                 </Link>
                 <Link
                   to="/pages"
