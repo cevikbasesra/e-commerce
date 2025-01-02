@@ -1,188 +1,148 @@
-import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import React from 'react';
+import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 
 const ContactPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-  };
-
-  const contactInfo = [
+  const locations = [
     {
-      icon: <MapPin size={24} />,
-      title: 'Address',
-      details: ['16 Fulton Street', 'New York, NY 10010']
+      city: 'Paris',
+      address: '1901 Thorn ridge Cir.',
+      zip: '75000 Paris',
+      phone: '+451 215 215',
+      fax: '+451 215 215'
     },
     {
-      icon: <Phone size={24} />,
-      title: 'Phone',
-      details: ['+1 (234) 567-89-00', '+1 (234) 567-89-01']
+      city: 'Berlin',
+      address: '4140 Parker Rd.',
+      zip: '75000 Paris',
+      phone: '+451 215 215',
+      fax: '+451 215 215'
     },
     {
-      icon: <Clock size={24} />,
-      title: 'Working Hours',
-      details: ['Mon - Fri: 9:00 - 18:00', 'Sat - Sun: 11:00 - 17:00']
+      city: 'New York',
+      address: '2715 Ash Dr. San Jose,',
+      zip: '75000 Paris',
+      phone: '+451 215 215',
+      fax: '+451 215 215'
     },
     {
-      icon: <Mail size={24} />,
-      title: 'Email',
-      details: ['contact@example.com', 'support@example.com']
+      city: 'London',
+      address: '3517 W. Gray St. Utica,',
+      zip: '75000 Paris',
+      phone: '+451 215 215',
+      fax: '+451 215 215'
     }
   ];
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-[#F9F9F9] py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#252B42] text-center mb-4">
-            Contact Us
+      {/* Get Answers Section */}
+      <div className="bg-white py-16 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#252B42] mb-4">
+            Get answers to all your questions.
           </h1>
-          <p className="text-gray-600 text-center max-w-2xl mx-auto">
-            Get in touch with us for any questions about our products or services.
+          <p className="text-gray-600 mb-8">
+            Problems trying to resolve the conflict between the two major realms of Classical physics.
           </p>
+          <button className="bg-[#23A6F0] text-white px-8 py-3 rounded hover:bg-[#1a85c2] transition-colors mb-8">
+            CONTACT OUR COMPANY
+          </button>
+          <div className="flex justify-center space-x-6">
+            <Twitter className="text-gray-500 hover:text-[#23A6F0] cursor-pointer" size={20} />
+            <Facebook className="text-gray-500 hover:text-[#23A6F0] cursor-pointer" size={20} />
+            <Instagram className="text-gray-500 hover:text-[#23A6F0] cursor-pointer" size={20} />
+            <Linkedin className="text-gray-500 hover:text-[#23A6F0] cursor-pointer" size={20} />
+          </div>
         </div>
       </div>
 
-      {/* Contact Information Grid */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {contactInfo.map((info, index) => (
-            <div
-              key={index}
-              className="bg-[#F9F9F9] p-6 rounded-lg text-center hover:shadow-lg transition-shadow"
-            >
-              <div className="text-[#23A6F0] mb-4 flex justify-center">
-                {info.icon}
-              </div>
-              <h3 className="text-lg font-bold text-[#252B42] mb-2">
-                {info.title}
-              </h3>
-              {info.details.map((detail, idx) => (
-                <p key={idx} className="text-gray-600">
-                  {detail}
-                </p>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Contact Form Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto bg-[#F9F9F9] p-8 rounded-lg">
-          <h2 className="text-3xl font-bold text-[#252B42] text-center mb-8">
-            Send Us a Message
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#23A6F0] focus:border-[#23A6F0]"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Your Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#23A6F0] focus:border-[#23A6F0]"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#23A6F0] focus:border-[#23A6F0]"
-                required
+      {/* Questions & Answers Section */}
+      <div className="bg-[#FAFAFA] py-16 md:py-24 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center">
+            <div className="w-full md:w-1/2 mb-8 md:mb-0">
+              <img 
+                src="/question.jpeg" 
+                alt="Questions and Answers" 
+                className="w-full h-auto rounded-lg shadow-lg"
               />
             </div>
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows="4"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#23A6F0] focus:border-[#23A6F0]"
-                required
-              ></textarea>
-            </div>
-            <div className="text-center">
-              <button
-                type="submit"
-                className="bg-[#23A6F0] text-white px-8 py-3 rounded-lg hover:bg-[#1a85c2] transition-colors"
-              >
-                Send Message
+            <div className="w-full md:w-1/2 md:pl-12 text-center md:text-left">
+              <h2 className="text-3xl font-bold text-[#252B42] mb-4">
+                Questions & Answers
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Problems trying to resolve the conflict between the two major realms of Classical physics
+              </p>
+              <button className="text-[#23A6F0] font-bold hover:text-[#1a85c2]">
+                CONTACT US
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
 
-      {/* Map Section */}
-      <div className="h-[400px] w-full bg-gray-200 mt-12">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2str!4v1672913457200!5m2!1sen!2str"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen=""
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
+      {/* Contact Us Section */}
+      <div 
+        className="relative py-16 md:py-24 mt-16 text-white"
+        style={{
+          backgroundImage: 'url(/homepage-slider.optimized.jpeg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#2A7CC7]/90 to-[#1C3F6E]/90"></div>
+        
+        <div className="container mx-auto px-4 relative">
+          <div className="md:flex md:justify-between">
+            <div className="mb-12 md:mb-0 md:w-1/3">
+              <h2 className="text-3xl font-bold mb-6">CONTACT US</h2>
+              <p className="mb-6">
+                Problems trying to resolve the conflict between the two major realms of Classical physics: Newtonian mechanics
+              </p>
+              <button className="bg-[#23A6F0] text-white px-6 py-2 rounded hover:bg-[#1a85c2] transition-colors">
+                CONTACT US
+              </button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 md:w-2/3">
+              {locations.map((location, index) => (
+                <div key={index} className="mb-8 md:mb-0">
+                  <h3 className="font-bold mb-4">{location.city}</h3>
+                  <p className="mb-2">{location.address}</p>
+                  <p className="mb-2">{location.zip}</p>
+                  <p className="mb-2">Phone: {location.phone}</p>
+                  <p>Fax: {location.fax}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Work With Us Section */}
+      <div className="bg-[#2A7CC7] text-white py-16 md:py-24 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center">
+            <div className="w-full md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+              <h3 className="text-sm mb-4">WORK WITH US</h3>
+              <h2 className="text-3xl font-bold mb-4">Now Let's grow Yours</h2>
+              <p className="mb-4">
+                The gradual accumulation of information about atomic and small-scale behavior during the first quarter of the 20th
+              </p>
+              <button className="border-2 border-white text-white px-6 py-2 rounded hover:bg-white hover:text-[#2A7CC7] transition-colors">
+                Button
+              </button>
+            </div>
+            <div className="w-full md:w-1/2 md:pl-12">
+              <img 
+                src="/grow.jpeg" 
+                alt="Grow with us" 
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
