@@ -1,5 +1,5 @@
 // HomePage.js
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard.jsx";
 import Slider from "../components/Slider.jsx";
@@ -22,6 +22,24 @@ const HomePage = () => {
           api.get(endpoints.products),
           api.get(endpoints.categories),
         ]);
+
+        // Fetch featured products (first 4 products)
+        const featuredResponse = await api.get(endpoints.products, {
+          params: {
+            limit: 4,
+            offset: 0,
+          },
+        });
+        const featuredProducts = featuredResponse.data.products;
+
+        // Fetch new arrivals (next 4 products)
+        const newArrivalsResponse = await api.get(endpoints.products, {
+          params: {
+            limit: 4,
+            offset: 4,
+          },
+        });
+        const newArrivals = newArrivalsResponse.data.products;
 
         // Sort products by sell_count
         const sortedProducts = productsResponse.data.products

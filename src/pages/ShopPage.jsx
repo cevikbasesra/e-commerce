@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 import api, { endpoints } from "../services/apiService";
 import ProductCard from "../components/ProductCard";
@@ -12,10 +12,11 @@ const ShopPage = () => {
   const { category, categoryId } = useParams();
   const { isMenuOpen } = useContext(MenuContext);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState(() => {
@@ -63,20 +64,18 @@ const ShopPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
+      const params = {
+        limit: ITEMS_PER_PAGE,
+        offset: currentPage * ITEMS_PER_PAGE
+      };
 
       if (categoryId && categoryId !== "undefined") {
-        params.append("category", categoryId);
+        params.category = categoryId;
       }
-      if (filter) params.append("filter", filter);
-      if (sortOption) params.append("sort", sortOption);
-      params.append("limit", ITEMS_PER_PAGE.toString());
-      params.append("offset", (currentPage * ITEMS_PER_PAGE).toString());
+      if (filter) params.filter = filter;
+      if (sortOption) params.sort = sortOption;
 
-      const queryString = params.toString();
-      const url = `${endpoints.products}${queryString ? `?${queryString}` : ""}`;
-
-      const response = await api.get(url);
+      const response = await api.get(endpoints.products, { params });
       if (response.data.products?.length === 0) {
         setError("No products found in this category.");
       } else {
@@ -167,6 +166,7 @@ const ShopPage = () => {
 
   const handlePageChange = ({ selected }) => {
     setCurrentPage(selected);
+    setSearchParams({ page: (selected + 1).toString() });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

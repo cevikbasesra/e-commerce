@@ -1,4 +1,4 @@
-import { ADD_TO_CART, REMOVE_FROM_CART, UPDATE_CART_ITEM, SET_CART, CLEAR_CART, SET_PAYMENT, SET_ADDRESS } from '../actions/types/cartTypes';
+import * as types from '../actions/types/cartTypes';
 
 // Load cart from localStorage if it exists
 const loadCartFromStorage = () => {
@@ -15,6 +15,8 @@ const initialState = {
   cart: loadCartFromStorage(),
   payment: {},
   address: {},
+  totalAmount: 0,
+  totalItems: 0
 };
 
 // Save cart to localStorage
@@ -39,7 +41,7 @@ const cartReducer = (state = initialState, action) => {
   let newCart;
 
   switch (action.type) {
-    case ADD_TO_CART:
+    case types.ADD_TO_CART:
       const existingItemIndex = state.cart.findIndex(item => item.id === action.payload.id);
       
       if (existingItemIndex !== -1) {
@@ -54,12 +56,12 @@ const cartReducer = (state = initialState, action) => {
       saveCartToStorage(newCart);
       return { ...state, cart: newCart };
 
-    case REMOVE_FROM_CART:
+    case types.REMOVE_FROM_CART:
       newCart = state.cart.filter(item => item.id !== action.payload);
       saveCartToStorage(newCart);
       return { ...state, cart: newCart };
 
-    case UPDATE_CART_ITEM:
+    case types.UPDATE_CART_ITEM:
       newCart = state.cart.map(item =>
         item.id === action.payload.productId
           ? { ...item, quantity: action.payload.quantity }
@@ -68,27 +70,36 @@ const cartReducer = (state = initialState, action) => {
       saveCartToStorage(newCart);
       return { ...state, cart: newCart };
 
-    case SET_CART:
+    case types.SET_CART:
       saveCartToStorage(action.payload);
       return {
         ...state,
         cart: action.payload,
       };
 
-    case CLEAR_CART:
+    case types.CLEAR_CART:
       clearCartFromStorage();
       return {
         ...state,
         cart: [],
       };
 
-    case SET_PAYMENT:
+    case types.RESET_CART:
+      clearCartFromStorage();
+      return {
+        ...state,
+        cart: [],
+        totalAmount: 0,
+        totalItems: 0
+      };
+
+    case types.SET_PAYMENT:
       return {
         ...state,
         payment: action.payload,
       };
 
-    case SET_ADDRESS:
+    case types.SET_ADDRESS:
       return {
         ...state,
         address: action.payload,

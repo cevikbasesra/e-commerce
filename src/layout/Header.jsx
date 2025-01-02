@@ -122,26 +122,15 @@ const Header = () => {
                 </div>
               ))}
               <div className="mt-4">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(false);
-                      navigateTo('/cart');
-                    }}
-                    className="flex-1 bg-[#23A6F0] text-white px-4 py-2 rounded hover:bg-[#1a85c2] transition-colors"
-                  >
-                    View Cart
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(false);
-                      navigateTo('/checkout');
-                    }}
-                    className="flex-1 bg-[#252B42] text-white px-4 py-2 rounded hover:bg-[#1e2333] transition-colors"
-                  >
-                    Complete Order
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    navigateTo('/create-order');
+                  }}
+                  className="w-full bg-[#23A6F0] text-white px-4 py-2 rounded hover:bg-[#1a85c2] transition-colors"
+                >
+                  View Cart
+                </button>
               </div>
             </>
           )}
@@ -317,7 +306,7 @@ const Header = () => {
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      Orders
+                      My Orders
                     </Link>
                     <button
                       onClick={() => {

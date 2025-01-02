@@ -33,3 +33,7 @@ export const setAddress = (address) => ({
   type: types.SET_ADDRESS,
   payload: address,
 });
+
+export const resetCart = () => ({
+  type: types.RESET_CART
+});

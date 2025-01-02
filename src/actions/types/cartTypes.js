@@ -5,3 +5,4 @@ export const SET_CART = 'SET_CART';
 export const CLEAR_CART = 'CLEAR_CART';
 export const SET_PAYMENT = 'SET_PAYMENT';
 export const SET_ADDRESS = 'SET_ADDRESS';
+export const RESET_CART = 'RESET_CART';

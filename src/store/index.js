@@ -3,7 +3,6 @@ import { thunk } from 'redux-thunk';
 import authReducer from '../reducers/authReducer';
 import productReducer from '../reducers/productReducer';
 import cartReducer from '../reducers/cartReducer';
-import clientReducer from '../reducers/clientReducer';
 import wishlistReducer from '../reducers/wishlistReducer';
 
 // Load state from storage based on Remember Me
@@ -54,8 +53,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   products: productReducer,
   cart: cartReducer,
-  client: clientReducer,
-  wishlist: wishlistReducer,
+  wishlist: wishlistReducer
 });
 
 const persistedState = loadState();

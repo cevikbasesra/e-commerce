@@ -1,9 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import api, { endpoints } from '../services/apiService';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Trash2, PencilLine } from 'lucide-react';
+import CardManagement from '../components/CardManagement';
+import orderService from '../services/orderService';
+import { resetCart } from '../actions/cartActions';
+import api, { endpoints } from '../services/apiService';
+
+const validateCardData = (card) => {
+  if (!card) return false;
+  
+  // Check required fields exist
+  const requiredFields = ['card_no', 'expire_month', 'expire_year', 'name_on_card'];
+  const hasAllFields = requiredFields.every(field => card[field] !== undefined && card[field] !== null);
+  if (!hasAllFields) return false;
+
+  // Validate card number (should be 16 digits)
+  const cardNoStr = card.card_no.toString().replace(/[\s-]/g, '');
+  if (!/^\d{16}$/.test(cardNoStr)) return false;
+
+  // Validate expiry date
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+
+  if (card.expire_year < currentYear || 
+      (card.expire_year === currentYear && card.expire_month < currentMonth) ||
+      card.expire_month < 1 || 
+      card.expire_month > 12) {
+    return false;
+  }
+
+  return true;
+};
+
+const validateCVV = (cvv) => {
+  return /^\d{3,4}$/.test(cvv);
+};
+
+const mapCardToOrderFormat = (savedCard, cvv) => {
+  if (!validateCardData(savedCard)) {
+    throw new Error('Invalid card data');
+  }
+
+  if (!validateCVV(cvv)) {
+    throw new Error('Invalid CVV');
+  }
+
+  return {
+    card_no: parseInt(savedCard.card_no.toString().replace(/[\s-]/g, '')),
+    card_name: savedCard.name_on_card,
+    card_expire_month: savedCard.expire_month,
+    card_expire_year: savedCard.expire_year,
+    card_ccv: cvv
+  };
+};
 
 const AddressForm = ({ onSubmit, initialData = null, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -171,13 +222,113 @@ const CreateOrderPage = () => {
   const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
   const [sameAsShipping, setSameAsShipping] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [use3DSecure, setUse3DSecure] = useState(false);
+  const [cvv, setCvv] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState(false);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { cart } = useSelector(state => state.cart);
 
-  // Calculate totals
-  const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const shipping = subtotal >= 150 ? 0 : 29.99;
-  const total = subtotal + shipping;
+  const calculateSubtotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+  };
+
+  const calculateShipping = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+    return subtotal >= 150 ? 0 : 29.99;
+  };
+
+  const calculateTotal = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+    const shipping = calculateShipping();
+    return (subtotal + shipping).toFixed(2);
+  };
+
+  const handleSubmitOrder = async () => {
+    setIsLoading(true);
+    try {
+      if (!selectedShippingAddress) {
+        toast.error('Please select a shipping address');
+        return;
+      }
+
+      if (!selectedCard) {
+        toast.error('Please select or add a payment method');
+        return;
+      }
+
+      if (!cvv) {
+        toast.error('Please enter CVV');
+        return;
+      }
+
+      // Validate and map card data
+      let cardData;
+      try {
+        cardData = mapCardToOrderFormat(selectedCard, cvv);
+      } catch (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      // Calculate total price
+      const totalPrice = cart.reduce((sum, item) => {
+        return sum + (item.price * item.quantity);
+      }, 0);
+
+      // Validate total price
+      if (totalPrice <= 0) {
+        toast.error('Invalid order total');
+        return;
+      }
+
+      // Format current date in required format
+      const orderDate = new Date().toISOString();
+
+      // Construct order data with validated card information
+      const orderData = {
+        address_id: selectedShippingAddress.id,
+        order_date: orderDate,
+        ...cardData,
+        price: totalPrice,
+        products: cart.map(item => ({
+          product_id: item.id,
+          count: item.quantity,
+          detail: item.selectedVariant || ''
+        }))
+      };
+
+      // Validate products array
+      if (!orderData.products.length) {
+        toast.error('Cart is empty');
+        return;
+      }
+
+      const response = await orderService.createOrder(orderData);
+      
+      // Clear cart after successful order
+      dispatch(resetCart());
+      
+      // Show success message
+      toast.success('Order placed successfully! Thank you for your purchase.');
+      
+      // Navigate to success page
+      navigate('/order-success');
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response?.data?.message || 'Failed to create order. Please try again.');
+      } else {
+        toast.error('Unable to connect to the server. Please try again later.');
+      }
+      console.error('Order submission error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAddresses();
@@ -187,9 +338,10 @@ const CreateOrderPage = () => {
     try {
       const response = await api.get(endpoints.address);
       setAddresses(response.data);
+      setServerError(false);
     } catch (error) {
-      toast.error('Failed to fetch addresses');
       console.error('Error fetching addresses:', error);
+      setServerError(true);
     }
   };
 
@@ -229,29 +381,47 @@ const CreateOrderPage = () => {
     }
   };
 
-  const handleContinue = () => {
-    if (!selectedShippingAddress || (!sameAsShipping && !selectedBillingAddress)) {
-      toast.error('Please select both shipping and billing addresses');
-      return;
+  const handleCardSelect = (card) => {
+    setSelectedCard(card);
+    setCvv(''); // Reset CVV when changing cards
+  };
+
+  const handleAddressSelect = (address, type) => {
+    if (type === 'shipping') {
+      setSelectedShippingAddress(address);
+    } else {
+      setSelectedBillingAddress(address);
     }
-    // Navigate to payment step or handle order creation
-    // You'll implement this in the next step
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Create Order</h1>
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">1</div>
-          <div className="h-1 w-16 bg-gray-300 mx-2"></div>
-          <div className="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center">2</div>
+      {serverError && (
+        <div className="bg-red-50 p-4 rounded-md mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Server Temporarily Unavailable
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>
+                  We're experiencing technical difficulties. Please try again in a few minutes.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
+      )}
+      <h1 className="text-2xl font-bold mb-6">Create Order</h1>
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Shipping Address Section */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Address Section */}
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Shipping Address</h2>
@@ -284,7 +454,7 @@ const CreateOrderPage = () => {
                     key={address.id}
                     address={address}
                     isSelected={selectedShippingAddress?.id === address.id}
-                    onSelect={() => setSelectedShippingAddress(address)}
+                    onSelect={() => handleAddressSelect(address, 'shipping')}
                     onEdit={(address) => {
                       setEditingAddress(address);
                       setShowAddressForm(true);
@@ -303,6 +473,7 @@ const CreateOrderPage = () => {
               <label className="flex items-center">
                 <input
                   type="checkbox"
+                  className="form-checkbox text-primary"
                   checked={sameAsShipping}
                   onChange={(e) => {
                     setSameAsShipping(e.target.checked);
@@ -310,9 +481,8 @@ const CreateOrderPage = () => {
                       setSelectedBillingAddress(selectedShippingAddress);
                     }
                   }}
-                  className="mr-2"
                 />
-                Same as shipping address
+                <span>Same as shipping address</span>
               </label>
             </div>
 
@@ -323,7 +493,7 @@ const CreateOrderPage = () => {
                     key={address.id}
                     address={address}
                     isSelected={selectedBillingAddress?.id === address.id}
-                    onSelect={() => setSelectedBillingAddress(address)}
+                    onSelect={() => handleAddressSelect(address, 'billing')}
                     onEdit={(address) => {
                       setEditingAddress(address);
                       setShowAddressForm(true);
@@ -334,39 +504,108 @@ const CreateOrderPage = () => {
               </div>
             )}
           </div>
+
+          {/* Payment Section */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
+            <div className="mb-4">
+              <p className="text-gray-600 mb-2">
+                You can securely pay with your Bank/Credit Card or Shopping Credit
+              </p>
+              <CardManagement onCardSelect={setSelectedCard} />
+            </div>
+            
+            {selectedCard && (
+              <div className="space-y-4 mt-4">
+                <div>
+                  <label htmlFor="cvv" className="block text-sm font-medium text-gray-700">
+                    CVV
+                  </label>
+                  <input
+                    type="password"
+                    id="cvv"
+                    maxLength="4"
+                    className="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                    value={cvv}
+                    onChange={(e) => setCvv(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox text-primary"
+                    checked={use3DSecure}
+                    onChange={(e) => setUse3DSecure(e.target.checked)}
+                  />
+                  <span>Pay with 3D Secure</span>
+                </label>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-lg shadow sticky top-4">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <div className="w-full h-fit bg-white rounded-lg shadow p-6 sticky top-4">
+            <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
             <div className="space-y-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
-              </div>
-              {shipping === 0 && (
-                <div className="text-green-600 text-sm">
-                  Free shipping on orders over $150!
+              {/* Cart Items */}
+              {cart.map(item => (
+                <div key={item.id} className="flex items-center gap-4 py-2">
+                  <img
+                    src={item.image || "https://via.placeholder.com/150"}
+                    alt={item.name}
+                    className="h-16 w-16 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                    <div className="text-sm text-gray-500">Quantity: {item.quantity}</div>
+                  </div>
+                  <div className="text-sm text-gray-900">
+                    ${(item.price * item.quantity).toFixed(2)}
+                  </div>
                 </div>
-              )}
-              <div className="border-t pt-4">
-                <div className="flex justify-between font-semibold">
+              ))}
+
+              {/* Order Details */}
+              <div className="space-y-4 pt-4">
+                <div className="flex justify-between text-gray-600">
+                  <span>Products Total</span>
+                  <span className="text-gray-900">${calculateSubtotal()}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping Total</span>
+                  <span className="text-gray-900">${calculateShipping().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Free Shipping Over $150 (Seller Covers)</span>
+                  <span className="text-[#23A6F0]">
+                    ${calculateShipping() === 0 ? '-29.99' : '0.00'}
+                  </span>
+                </div>
+                <div className="flex justify-between font-medium text-lg pt-4 border-t">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span className="text-[#23A6F0] font-semibold">
+                    ${calculateTotal()}
+                  </span>
                 </div>
               </div>
+
+              {/* Place Order Button */}
+              <button
+                onClick={handleSubmitOrder}
+                disabled={isLoading || !selectedShippingAddress || !selectedCard || !cvv}
+                className={`w-full py-3 px-4 rounded-md text-white font-medium ${
+                  isLoading || !selectedShippingAddress || !selectedCard || !cvv
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-[#23A6F0] hover:bg-[#1a85c2] transition-colors'
+                }`}
+              >
+                {isLoading ? 'Processing...' : 'Place Order'}
+              </button>
             </div>
-            <button
-              onClick={handleContinue}
-              className="w-full mt-6 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-            >
-              Continue to Payment
-            </button>
           </div>
         </div>
       </div>

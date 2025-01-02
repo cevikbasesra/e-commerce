@@ -1,11 +1,6 @@
 import axios from "axios";
 
-// Safely get environment variable with fallback
-const API_URL =
-  (typeof process !== "undefined" &&
-    process.env &&
-    process.env.REACT_APP_API_URL) ||
-  "https://workintech-fe-ecommerce.onrender.com/";
+const API_URL = "https://workintech-fe-ecommerce.onrender.com/";
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -15,12 +10,12 @@ export const api = axios.create({
   },
 });
 
-// Get token from appropriate storage
+// Get token from storage (only localStorage as per requirements)
 const getStoredToken = () => {
-  return localStorage.getItem("token") || sessionStorage.getItem("token");
+  return localStorage.getItem("token");
 };
 
-// Consolidated interceptors
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = getStoredToken();
@@ -32,12 +27,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
+      delete api.defaults.headers.common['Authorization'];
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -49,16 +45,11 @@ const authService = {
     try {
       const response = await api.post("/login", credentials);
       if (response.data.token) {
+        // Only store in localStorage if rememberMe is true
         if (credentials.rememberMe) {
-          // Store in localStorage for "Remember Me"
           localStorage.setItem("token", response.data.token);
-          sessionStorage.removeItem("token"); // Clean up any session token
-        } else {
-          // Store in sessionStorage if "Remember Me" is not checked
-          sessionStorage.setItem("token", response.data.token);
-          localStorage.removeItem("token"); // Clean up any persisted token
+          api.defaults.headers.common['Authorization'] = response.data.token;
         }
-        api.defaults.headers.common['Authorization'] = response.data.token;
       }
       return response.data;
     } catch (error) {
@@ -72,46 +63,34 @@ const authService = {
 
   logout: () => {
     localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
     delete api.defaults.headers.common['Authorization'];
   },
 
   verifyToken: async () => {
     try {
-      console.log('Making verify request');
       const token = getStoredToken();
       if (!token) {
         throw new Error('No token found');
       }
 
       const response = await api.get("/verify");
-      console.log('Verify response:', response.status, response.data);
       
-      if (response.status === 200) {
-        console.log('Got successful response');
+      if (response.status === 200 && response.data) {
+        // Update token if a new one is provided
         if (response.data.token) {
-          console.log('Updating token');
-          // Keep the token in the same storage it was in
-          if (localStorage.getItem("token")) {
-            localStorage.setItem("token", response.data.token);
-          } else {
-            sessionStorage.setItem("token", response.data.token);
-          }
+          localStorage.setItem("token", response.data.token);
           api.defaults.headers.common['Authorization'] = response.data.token;
         }
         return response.data;
-      } else if (response.status === 204) {
-        console.log('Token valid, but no data');
-        return null;
       }
+      
+      return null;
     } catch (error) {
-      console.log('Verify error:', error);
       localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
       delete api.defaults.headers.common['Authorization'];
       throw error;
     }
-  },
+  }
 };
 
 export default authService;
