@@ -199,11 +199,18 @@ const OrdersPage = () => {
                         {order.products?.map((product) => (
                           <div
                             key={product.id}
-                            className="flex items-center justify-between text-sm"
+                            className="flex items-center justify-between text-sm py-2"
                           >
-                            <div className="flex items-center">
-                              <span className="font-medium">{product.name || 'Unknown Product'}</span>
-                              <span className="text-gray-500 ml-2">x{product.count || 1}</span>
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/40x40?text=No+Image'}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover rounded-md"
+                              />
+                              <div>
+                                <span className="font-medium">{product.name || 'Unknown Product'}</span>
+                                <span className="text-gray-500 ml-2">x{product.count || 1}</span>
+                              </div>
                             </div>
                             <span>${((product.price || 0) * (product.count || 1)).toFixed(2)}</span>
                           </div>
